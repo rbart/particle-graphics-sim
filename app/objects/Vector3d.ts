@@ -4,7 +4,7 @@ export default class Vector3d {
     public y: number,
     public z: number) { }
 
-    length() {
+    length(): number {
       return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z)
     }
 }
