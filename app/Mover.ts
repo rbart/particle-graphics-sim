@@ -18,13 +18,11 @@ export default class Mover {
 
       for (let j = i + 1; j < particles.length; j++) {
         let p2 = particles[j];
-        let dx = particle.pos.x - p2.pos.x;
-        let dy = particle.pos.y - p2.pos.y;
-        let grav = 1.0/(dx*dx + dy*dy) * this.grav;
-        particle.spd.x -= dx * grav;
-        particle.spd.y -= dy * grav;
-        p2.spd.x += dx * grav;
-        p2.spd.y += dy * grav;
+        let diff = particle.pos.subtract(p2.pos);
+        let gravityStrength = 1.0/(diff.lengthSquared()) * this.grav;
+        let gravityVector = diff.multiply(gravityStrength);
+        particle.spd.subtractMutate(gravityVector)
+        p2.spd.addMutate(gravityVector)
       }
     }
   }
