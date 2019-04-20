@@ -1,4 +1,5 @@
 import Particle from './objects/Particle'
+import Vector2d from './objects/Vector2d'
 
 export default class Drawer {
   constructor(
@@ -9,13 +10,13 @@ export default class Drawer {
   //doClear: number = 0;
 
   init() {
-    this.ctx.fillStyle = "black";
+    this.ctx.globalAlpha = 1;
+    this.ctx.fillStyle = "rgb(253,253,253)";
     this.ctx.fillRect(0,0,this.width,this.height);
   }
 
   clear() {
-    //if (this.doClear++ %1 != 0) return;
-    this.ctx.globalAlpha = 0.1;
+    this.ctx.globalAlpha = 0.3;
     this.ctx.fillStyle = "black";
     this.ctx.fillRect(0,0,this.width,this.height);
     this.ctx.globalAlpha = 1.0;
@@ -27,6 +28,14 @@ export default class Drawer {
       this.ctx.arc(particle.pos.x, particle.pos.y, particle.rad, 0, 2 * Math.PI);
       this.ctx.fillStyle = particle.color;
       this.ctx.fill();
+      if (particle.spd.lengthSquared() < particle.rad) continue;
+      this.ctx.beginPath();
+      this.ctx.strokeStyle = particle.color;
+      this.ctx.lineWidth = particle.rad * 2
+      this.ctx.moveTo(particle.pos.x, particle.pos.y);
+      let lastPos: Vector2d = particle.pos.subtract(particle.spd);
+      this.ctx.lineTo(lastPos.x, lastPos.y);
+      this.ctx.stroke();
     }
   }
 }
