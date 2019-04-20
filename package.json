@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no tests installed\" && exit 1",
-    "build": "tsc && webpack app/script.js -o app/app.bundle.js --mode=production",
-    "build:dev": "tsc && webpack app/script.js -o app/app.bundle.js --mode=development",
+    "build": "webpack --config webpack.config.js --mode=production",
+    "build:dev": "webpack --config webpack.config.js --mode=development",
+    "watch": "webpack --config webpack.config.js --mode=development --watch",
     "start": "node server.js"
   },
   "author": "",
@@ -19,6 +20,7 @@
   "devDependencies": {
     "@types/react": "^16.8.14",
     "@types/react-dom": "^16.8.4",
+    "awesome-typescript-loader": "^5.2.1",
     "typescript": "^3.4.3"
   }
 }
