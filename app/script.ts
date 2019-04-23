@@ -1,6 +1,7 @@
 import Particle from "./objects/Particle";
 import ParticleBuilder from "./objects/ParticleBuilder"
-import Mover from "./Mover"
+import Advancer from "./state/mutation/Advancer"
+import AdvancerBuilder from "./state/mutation/AdvancerBuilder"
 import Drawer from "./Drawer"
 
 var c = <HTMLCanvasElement>document.getElementById("canvas");
@@ -18,11 +19,7 @@ function fullscreen(){
 }
 c.addEventListener("click",fullscreen)
 
-let ctx_temp: CanvasRenderingContext2D | null;
-if (!(ctx_temp = c.getContext("2d"))) {
-  throw new Error(`2d context not supported or canvas already initialized`);
-}
-let ctx: CanvasRenderingContext2D = ctx_temp!;
+let ctx: CanvasRenderingContext2D = <CanvasRenderingContext2D>c.getContext("2d")//ctx_temp!;
 
 let particles: Particle[] = []
 
@@ -37,13 +34,13 @@ let drawer: Drawer = new Drawer(ctx, c.width, c.height);
 
 drawer.init();
 
-let mover: Mover = new Mover(0.02, c.width, c.height);
+let advancer: Advancer = AdvancerBuilder.createDefault(c.width, c.height);
 
 function frame() {
   drawer.clear();
-  mover.move(particles);
+  advancer.advance(particles);
   drawer.drawCircle(particles);
-  requestAnimationFrame(() => frame());
+  requestAnimationFrame(frame);
 }
 
 requestAnimationFrame(frame);
