@@ -1,5 +1,5 @@
-import Particle from "./objects/Particle";
-import ParticleBuilder from "./objects/ParticleBuilder"
+import Particle from "./state/Particle";
+import ParticleBuilder from "./state/ParticleBuilder"
 import Advancer from "./state/mutation/Advancer"
 import AdvancerBuilder from "./state/mutation/AdvancerBuilder"
 import Drawer from "./Drawer"

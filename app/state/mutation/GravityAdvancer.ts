@@ -1,5 +1,5 @@
 import Advancer from './Advancer'
-import Particle from '../../objects/Particle'
+import Particle from '../Particle'
 
 export default class GravityAdvancer implements Advancer {
 

@@ -2,7 +2,7 @@ import Advancer from "./Advancer"
 import BasicAdvancer from './BasicAdvancer'
 import WallBounceAdvancer from './WallBounceAdvancer'
 import GravityAdvancer from './GravityAdvancer'
-import Particle from '../../objects/Particle'
+import Particle from '../Particle'
 
 export default class AdvancerBuilder implements Advancer {
 
