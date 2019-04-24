@@ -1,8 +1,9 @@
 import Particle from "./state/Particle";
 import ParticleBuilder from "./state/ParticleBuilder"
 import Advancer from "./state/mutation/Advancer"
-import AdvancerBuilder from "./state/mutation/AdvancerBuilder"
-import Drawer from "./Drawer"
+import AdvancerBuilder from "./state/mutation/AdvancerCollectionBuilder"
+import Renderer from "./visualization/Renderer"
+import RendererBuilder from "./visualization/RendererBuilder"
 
 var c = <HTMLCanvasElement>document.getElementById("canvas");
 c.width  = window.innerWidth;
@@ -30,16 +31,15 @@ for (var i = 0; i < 500; i++) {
   particles.push(particle);
 }
 
-let drawer: Drawer = new Drawer(ctx, c.width, c.height);
+let renderer: Renderer = RendererBuilder.createDefault(ctx, c.width, c.height, 0.3);
 
-drawer.init();
+renderer.initialize();
 
 let advancer: Advancer = AdvancerBuilder.createDefault(c.width, c.height);
 
 function frame() {
-  drawer.clear();
   advancer.advance(particles);
-  drawer.drawCircle(particles);
+  renderer.render(particles);
   requestAnimationFrame(frame);
 }
 

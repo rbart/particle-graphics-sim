@@ -2,15 +2,9 @@ import Advancer from "./Advancer"
 import BasicAdvancer from './BasicAdvancer'
 import WallBounceAdvancer from './WallBounceAdvancer'
 import GravityAdvancer from './GravityAdvancer'
-import Particle from '../Particle'
+import AdvancerCollection from './AdvancerCollection'
 
-export default class AdvancerBuilder implements Advancer {
-
-  constructor(private advancers: Advancer[]) {}
-
-  advance(particles: Particle[]): void {
-    this.advancers.forEach(advancer => advancer.advance(particles))
-  }
+export default class AdvancerCollectionBuilder {
 
   static createDefault(width: number, height: number): Advancer {
 
@@ -20,6 +14,6 @@ export default class AdvancerBuilder implements Advancer {
       new BasicAdvancer()
     ];
 
-    return new AdvancerBuilder(advancers)
+    return new AdvancerCollection(advancers)
   }
 }
