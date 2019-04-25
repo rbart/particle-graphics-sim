@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha -r ts-node/register app/test/**/*.ts",
+    "test": "mocha -r ts-node/register app/**/*.spec.ts",
     "build": "webpack --config webpack.config.js --mode=production",
     "build:dev": "webpack --config webpack.config.js --mode=development",
     "watch": "webpack --config webpack.config.js --mode=development --watch",
