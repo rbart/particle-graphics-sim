@@ -12,7 +12,7 @@ export default class QuadTree<TElement extends HasPosition2d> {
   }
 }
 
-abstract class QuadTreeNode<TElement extends HasPosition2d> {
+abstract class QuadTreeNode<TElement extends HasPosition2d> implements Iterable<TElement> {
   constructor(
     readonly origin: Vector2d,
     readonly extents: Vector2d) {}
@@ -25,6 +25,8 @@ abstract class QuadTreeNode<TElement extends HasPosition2d> {
   }
 
   abstract add(element: TElement): QuadTreeNode<TElement>
+
+  abstract [Symbol.iterator](): Iterator<TElement>
 }
 
 class QuadTreeInternalNode<TElement extends HasPosition2d> extends QuadTreeNode<TElement> {
@@ -49,19 +51,24 @@ class QuadTreeInternalNode<TElement extends HasPosition2d> extends QuadTreeNode<
     return this;
   }
 
+  *[Symbol.iterator](): Iterator<TElement> {
+    for (let child of this.children()) {
+      for (let element of this.upperLeft) {
+        yield element;
+      }
+    }
+  }
+
   private children(): QuadTreeNode<TElement>[] {
     return [this.upperLeft, this.upperRight, this.lowerLeft, this.lowerRight]
   }
 }
 
-class QuadTreeLeafNode<TElement extends HasPosition2d> extends QuadTreeNode<TElement> {
+export class QuadTreeLeafNode<TElement extends HasPosition2d> extends QuadTreeNode<TElement> {
 
   readonly elements: TElement[]
 
-  constructor(
-    readonly origin: Vector2d,
-    readonly extents: Vector2d
-  ) {
+  constructor(readonly origin: Vector2d, readonly extents: Vector2d) {
     super(origin, extents)
     this.elements = []
   }
@@ -88,6 +95,12 @@ class QuadTreeLeafNode<TElement extends HasPosition2d> extends QuadTreeNode<TEle
         lowerLeft,
         lowerRight);
       return newInternalNode;
+    }
+  }
+
+  *[Symbol.iterator](): Iterator<TElement> {
+    for (let element of this.elements) {
+      yield element;
     }
   }
 }
