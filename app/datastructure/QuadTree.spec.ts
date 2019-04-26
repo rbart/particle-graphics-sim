@@ -1,4 +1,4 @@
-import { QuadTreeLeafNode } from './QuadTree';
+import QuadTreeLeafNode from './QuadTreeLeafNode';
 import Vector2d from '../state/Vector2d'
 import HasPosition2d from '../state/HasPosition2d'
 import { expect } from 'chai';
@@ -38,7 +38,7 @@ describe('QuadTreeLeafNode', () => {
     node.add(testElement)
     node.add(testElement)
     let actualElements = [...node]
-    expect(actualElements.length).to.equal(3);
+    expect(actualElements.length).to.equal(1);
     actualElements.forEach(el => expect(el).to.equal(testElement))
   });
 });
