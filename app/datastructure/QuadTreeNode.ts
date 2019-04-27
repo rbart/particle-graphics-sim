@@ -17,7 +17,9 @@ export default abstract class QuadTreeNode<TElement extends HasPosition2d> imple
 
   abstract [Symbol.iterator](): Iterator<TElement>
 
-  abstract allNodes(): Iterator<QuadTreeNode<TElement>>
+  abstract allNodes(): Iterable<QuadTreeNode<TElement>>
 
-  abstract allNonIntersectingNodes(position: Vector2d): Iterator<QuadTreeNode<TElement>>
+  abstract allLeafNodes(): Iterable<QuadTreeNode<TElement>>
+
+  abstract allNonIntersectingNodes(position: Vector2d): Iterable<QuadTreeNode<TElement>>
 }

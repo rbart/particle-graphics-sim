@@ -19,11 +19,15 @@ export default class QuadTree<TElement extends HasPosition2d> implements Iterabl
     return this.root[Symbol.iterator]()
   }
 
-  allNodes(): Iterator<QuadTreeNode<TElement>> {
+  allNodes(): Iterable<QuadTreeNode<TElement>> {
     return this.root.allNodes();
   }
 
-  allNonIntersectingNodes(position: Vector2d): Iterator<QuadTreeNode<TElement>> {
+  allLeafNodes(): Iterable<QuadTreeNode<TElement>> {
+    return this.root.allLeafNodes();
+  }
+
+  allNonIntersectingNodes(position: Vector2d): Iterable<QuadTreeNode<TElement>> {
     return this.root.allNonIntersectingNodes(position)
   }
 }

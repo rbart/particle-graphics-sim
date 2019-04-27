@@ -6,15 +6,20 @@ export default class QuadTreeInternalNode<TElement extends HasPosition2d> extend
   constructor(
     readonly origin: Vector2d,
     readonly extents: Vector2d,
-    readonly upperLeft: QuadTreeNode<TElement>,
-    readonly upperRight: QuadTreeNode<TElement>,
-    readonly lowerLeft: QuadTreeNode<TElement>,
-    readonly lowerRight: QuadTreeNode<TElement>
+    public upperLeft: QuadTreeNode<TElement>,
+    public upperRight: QuadTreeNode<TElement>,
+    public lowerLeft: QuadTreeNode<TElement>,
+    public lowerRight: QuadTreeNode<TElement>
   ) {
     super(origin, extents)
   }
 
   add(newElement: TElement): QuadTreeNode<TElement> {
+
+    // if (!this.contains(newElement.position())) {
+    //   throw newElement + " is not contained within " + this
+    // }
+
     if (this.upperLeft.contains(newElement.position())) {
       this.upperLeft = this.upperLeft.add(newElement);
     }
@@ -38,16 +43,29 @@ export default class QuadTreeInternalNode<TElement extends HasPosition2d> extend
     }
   }
 
-  *allNodes(): Iterator<QuadTreeNode<TElement>> {
+  *allNodes(): Iterable<QuadTreeNode<TElement>> {
     for (let child of this.children()) {
-      yield child;
+      yield child
+      for (let node of child.allNodes()) {
+        yield node
+      }
     }
   }
 
-  *allNonIntersectingNodes(position: Vector2d): Iterator<QuadTreeNode<TElement>> {
+  *allLeafNodes(): Iterable<QuadTreeNode<TElement>> {
     for (let child of this.children()) {
-      if (!this.contains(position)) {
-        yield(this)
+      for (let node of child.allLeafNodes()) {
+        yield node
+      }
+    }
+  }
+
+  *allNonIntersectingNodes(position: Vector2d): Iterable<QuadTreeNode<TElement>> {
+    for (let child of this.children()) {
+      if (!child.contains(position)) {
+        for (let node of child.allNonIntersectingNodes(position)) {
+          yield node
+        }
       }
     }
   }

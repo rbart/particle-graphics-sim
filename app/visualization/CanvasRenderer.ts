@@ -1,6 +1,7 @@
 import Particle from '../state/Particle'
 import Vector2d from '../state/Vector2d'
 import Renderer from './Renderer'
+import QuadTree from '../datastructure/QuadTree'
 
 export default class CanvasRenderer implements Renderer {
   constructor(
@@ -17,6 +18,20 @@ export default class CanvasRenderer implements Renderer {
 
   render(particles: Particle[]) {
     this.fade()
+
+    // let particleQuadTree = new QuadTree<Particle>(new Vector2d(0,0), new Vector2d(this.width,this.height))
+    //
+    // for (let particle of particles) {
+    //   particleQuadTree.add(particle)
+    // }
+
+    // for (let node of particleQuadTree.allLeafNodes()) {
+    //   this.ctx.lineWidth = 1
+    //   this.ctx.strokeStyle = "rgb(30,30,30)";
+    //   this.ctx.rect(node.origin.x, node.origin.y, node.extents.x, node.extents.y);
+    //   this.ctx.stroke();
+    // }
+
     for (let particle of particles) {
       this.drawCircle(particle)
       if (particle.spd.lengthSquared() > particle.rad) {

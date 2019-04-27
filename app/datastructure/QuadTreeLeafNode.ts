@@ -14,12 +14,9 @@ export default class QuadTreeLeafNode<TElement extends HasPosition2d> extends Qu
 
   add(newElement: TElement): QuadTreeNode<TElement> {
 
-    if (!this.contains(newElement.position())) {
-      throw newElement + " is not contained within " + this
-    }
-
     if (this.elements.length == 0 ||
-        this.elements.every(e => e.position().equals(newElement.position()))
+        this.elements.every(e => e.position().equals(newElement.position())) ||
+        this.extents.length() < 100
         ) {
       this.elements.push(newElement);
       return this;
@@ -50,13 +47,17 @@ export default class QuadTreeLeafNode<TElement extends HasPosition2d> extends Qu
     }
   }
 
-  *allNodes(): Iterator<QuadTreeNode<TElement>> {
+  *allNodes(): Iterable<QuadTreeNode<TElement>> {
     yield this
   }
 
-  *allNonIntersectingNodes(position: Vector2d): Iterator<QuadTreeNode<TElement>> {
+  *allNonIntersectingNodes(position: Vector2d): Iterable<QuadTreeNode<TElement>> {
     if (!this.contains(position)) {
-      yield(this)
+      yield this
     }
+  }
+
+  *allLeafNodes(): Iterable<QuadTreeNode<TElement>> {
+    yield this
   }
 }
