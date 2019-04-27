@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha -r ts-node/register app/**/*.spec.ts",
+    "test:browser": "webpack --config webpack-test.config.js --mode=development --watch",
     "build": "webpack --config webpack.config.js --mode=production",
     "build:dev": "webpack --config webpack.config.js --mode=development",
     "watch": "webpack --config webpack.config.js --mode=development --watch",
@@ -13,6 +14,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/node": "^11.13.8",
     "parcel-bundler": "^1.12.3",
     "react": "^16.8.6",
     "react-dom": "^16.8.6"
@@ -24,9 +26,11 @@
     "@types/react-dom": "^16.8.4",
     "@types/sinon": "^7.0.11",
     "@types/sinon-chai": "^3.2.2",
+    "@types/webpack-env": "^1.13.9",
     "awesome-typescript-loader": "^5.2.1",
     "chai": "^4.2.0",
     "mocha": "^6.1.4",
+    "requirejs": "^2.3.6",
     "sinon": "^7.3.2",
     "sinon-chai": "^3.3.0",
     "ts-node": "^8.1.0",

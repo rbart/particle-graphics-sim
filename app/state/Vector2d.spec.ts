@@ -1,6 +1,6 @@
 import Vector2d from './Vector2d';
 import { expect } from 'chai';
-import 'mocha';
+//import 'mocha';
 
 describe('Vector2d', () => {
 

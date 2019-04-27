@@ -2,7 +2,7 @@ import QuadTreeLeafNode from './QuadTreeLeafNode';
 import Vector2d from '../state/Vector2d'
 import HasPosition2d from '../state/HasPosition2d'
 import { expect } from 'chai';
-import 'mocha';
+//import 'mocha';
 
 class TestElement implements HasPosition2d {
 
@@ -38,7 +38,20 @@ describe('QuadTreeLeafNode', () => {
     node.add(testElement)
     node.add(testElement)
     let actualElements = [...node]
-    expect(actualElements.length).to.equal(1);
+    expect(actualElements.length).to.equal(3);
     actualElements.forEach(el => expect(el).to.equal(testElement))
+  });
+
+  it('should return an internal node when adding multiple elements', () => {
+    let node = new QuadTreeLeafNode<TestElement>(origin, extents);
+    let element1 = new TestElement(2, 2)
+    let element2 = new TestElement(3, 3)
+    expect(node.add(element1)).to.equal(node)
+    let expected_internal = node.add(element2)
+
+    let actualElements = [...expected_internal]
+    expect(actualElements.length).to.equal(2);
+    expect(actualElements[0]).to.equal(element1);
+    expect(actualElements[1]).to.equal(element2);
   });
 });

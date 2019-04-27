@@ -15,19 +15,39 @@ export default class QuadTreeInternalNode<TElement extends HasPosition2d> extend
   }
 
   add(newElement: TElement): QuadTreeNode<TElement> {
-    for (let child of this.children()) {
-      if (child.contains(newElement.position())) {
-        child.add(newElement);
-        break;
-      }
+    if (this.upperLeft.contains(newElement.position())) {
+      this.upperLeft = this.upperLeft.add(newElement);
+    }
+    else if (this.upperRight.contains(newElement.position())) {
+      this.upperRight = this.upperRight.add(newElement);
+    }
+    else if (this.lowerLeft.contains(newElement.position())) {
+      this.lowerLeft = this.lowerLeft.add(newElement);
+    }
+    else if (this.lowerRight.contains(newElement.position())) {
+      this.lowerRight = this.lowerRight.add(newElement);
     }
     return this;
   }
 
   *[Symbol.iterator](): Iterator<TElement> {
     for (let child of this.children()) {
-      for (let element of this.upperLeft) {
+      for (let element of child) {
         yield element;
+      }
+    }
+  }
+
+  *allNodes(): Iterator<QuadTreeNode<TElement>> {
+    for (let child of this.children()) {
+      yield child;
+    }
+  }
+
+  *allNonIntersectingNodes(position: Vector2d): Iterator<QuadTreeNode<TElement>> {
+    for (let child of this.children()) {
+      if (!this.contains(position)) {
+        yield(this)
       }
     }
   }
