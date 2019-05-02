@@ -44,4 +44,8 @@ export default class Vector2d {
     length(): number {
       return Math.sqrt(this.lengthSquared())
     }
+
+    toString(): string {
+      return `Vector2d: {x: ${this.x}, y: ${this.y}}`
+    }
 }
