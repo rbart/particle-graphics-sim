@@ -25,16 +25,8 @@ export default class ParticleBuilder {
 
   private getRndColor() {
 
-    let rgbVect = new Vector3d(
-      255*Math.random(),
-      255*Math.random(),
-      255*Math.random());
+    let hue = (360 * Math.random() | 0)
 
-    let scaleFactor = 255 / rgbVect.length();
-
-    let r = scaleFactor*rgbVect.x|0,
-        g = scaleFactor*rgbVect.y|0,
-        b = scaleFactor*rgbVect.z|0;
-    return 'rgb(' + r + ',' + g + ',' + b + ')';
+    return new Vector3d(hue, 100, 50);
   }
 }
