@@ -1,4 +1,4 @@
-import QuadTreeLeafNode from './QuadTreeLeafNode';
+import QuadTreeLeafNode from './QuadTreeNode';
 import Vector2d from '../state/Vector2d'
 import HasPosition2d from '../state/HasPosition2d'
 import { expect } from 'chai';
@@ -26,7 +26,7 @@ describe('QuadTreeLeafNode', () => {
     let node = new QuadTreeLeafNode<TestElement>(origin, extents);
     let testElement = new TestElement(2, 2)
     node.add(testElement)
-    let actualElements = [...node]
+    let actualElements = node.elements!
     expect(actualElements.length).to.equal(1);
     expect(actualElements[0]).to.equal(testElement);
   });
@@ -37,7 +37,8 @@ describe('QuadTreeLeafNode', () => {
     node.add(testElement)
     node.add(testElement)
     node.add(testElement)
-    let actualElements = [...node]
+    let actualElements = node.elements!
+    expect(node.isLeaf).to.be.true
     expect(actualElements.length).to.equal(3);
     actualElements.forEach(el => expect(el).to.equal(testElement))
   });
@@ -46,10 +47,11 @@ describe('QuadTreeLeafNode', () => {
     let node = new QuadTreeLeafNode<TestElement>(origin, extents);
     let element1 = new TestElement(2, 2)
     let element2 = new TestElement(3, 3)
-    expect(node.add(element1)).to.equal(node)
-    let expected_internal = node.add(element2)
+    node.add(element1)
+    node.add(element2)
 
-    let actualElements = [...expected_internal]
+    let actualElements = node.elements!
+    expect(node.isLeaf).to.be.false
     expect(actualElements.length).to.equal(2);
     expect(actualElements[0]).to.equal(element1);
     expect(actualElements[1]).to.equal(element2);
