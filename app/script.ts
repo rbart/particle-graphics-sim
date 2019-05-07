@@ -6,8 +6,9 @@ import Renderer from "./visualization/Renderer"
 import RendererBuilder from "./visualization/RendererBuilder"
 
 var c = <HTMLCanvasElement>document.getElementById("canvas");
-c.width  = window.innerWidth;
-c.height = window.innerHeight;
+var container = <HTMLCanvasElement>document.getElementsByClassName("container")[0];
+c.width  = container.offsetWidth;//window.innerWidth;
+c.height = container.offsetHeight;//window.innerHeight;
 
 function fullscreen(){
   var el = <any>document.getElementById('canvas');
