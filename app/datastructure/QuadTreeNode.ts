@@ -8,7 +8,8 @@ export default class QuadTreeNode<
 
   public elements: TElement[] = []
   public isLeaf: boolean;
-  public cachedAggregate: TAggregate | null = null
+  public aggregate: TAggregate | null = null
+  public isEmpty: boolean = true
 
   constructor(
     public origin: Vector2d,
@@ -25,7 +26,8 @@ export default class QuadTreeNode<
     else return [this.upperLeft!, this.upperRight!, this.lowerLeft!, this.lowerRight!]
   }
 
-  contains(position: Vector2d): boolean {
+  contains(element: HasPosition2d): boolean {
+    let position = element.position()
     return position.x >= this.origin.x &&
       position.x < this.origin.x + this.extents.x &&
       position.y >= this.origin.y &&

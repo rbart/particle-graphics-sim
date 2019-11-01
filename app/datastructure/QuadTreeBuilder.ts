@@ -11,7 +11,7 @@ export class ParticleAggregate implements Aggregate<Particle> {
 
 export interface Aggregator<TElement, TAggregate extends Aggregate<TElement>> {
   aggregate(elements: TElement[]): TAggregate
-  aggregate(aggregates: Aggregate<TElement>[]): TAggregate
+  combine(aggregates: Aggregate<TElement>[]): TAggregate
 }
 
 export class ParticleAggregator implements Aggregator<Particle, ParticleAggregate> {
@@ -24,13 +24,27 @@ export class ParticleAggregator implements Aggregator<Particle, ParticleAggregat
       sumX += particle.pos.x
       sumY += particle.pos.y
     }
+    let avgX = totalMass == 0 ? 0 : sumX / totalMass
+    let avgY = totalMass == 0 ? 0 : sumY / totalMass
+    return new ParticleAggregate(new Vector2d(avgX, avgY), totalMass)
+  }
+  combine(aggregates: ParticleAggregate[]): ParticleAggregate {
+    let totalMass = 0
+    let sumX = 0
+    let sumY = 0
+    for (let agg of aggregates) {
+      if (agg.totalMass == 0) continue;
+      totalMass += agg.totalMass
+      sumX += agg.centroid.x * agg.totalMass
+      sumY += agg.centroid.y * agg.totalMass
+    }
     let avgX = sumX / totalMass
     let avgY = sumY / totalMass
     return new ParticleAggregate(new Vector2d(avgX, avgY), totalMass)
   }
 }
 
-class QuadTree<
+export class QuadTree<
   TElement extends HasPosition2d,
   TAggregate extends Aggregate<TElement>,
   TAggregator extends Aggregator<TElement, TAggregate>> {
@@ -45,13 +59,18 @@ class QuadTree<
     this.computeAggregatesRecursive(this.root)
   }
 
+  clear() {
+    this.clearRecursive(this.root)
+  }
+
   private addRecursive(element: TElement, node: QuadTreeNode<TElement, TAggregate>) {
+    node.isEmpty = false
     if (node.isLeaf) {
       node.elements.push(element)
     } else {
       let children = [node.upperLeft!, node.upperRight!, node.lowerLeft!, node.lowerRight!]
       for (let child of children) {
-        if (child.contains(element.position())) {
+        if (child.contains(element)) {
           this.addRecursive(element, child);
           break;
         }
@@ -60,15 +79,31 @@ class QuadTree<
   }
 
   private computeAggregatesRecursive(node: QuadTreeNode<TElement, TAggregate>) {
-    if (node.isLeaf) {
-      node.cachedAggregate = this.aggregator.aggregate(node.elements)
+    if (node.isEmpty) {
+      node.aggregate = this.aggregator.aggregate(node.elements)
+      return
+    } else if (node.isLeaf) {
+      node.aggregate = this.aggregator.aggregate(node.elements)
     } else {
       let children = node.children()
       for (let child of children) {
         this.computeAggregatesRecursive(child)
       }
-      let childAggregates: Aggregate<TElement>[] = children.map(c => c.cachedAggregate!)
-      node.cachedAggregate = this.aggregator.aggregate(childAggregates)
+      let childAggregates: Aggregate<TElement>[] = children.map(c => c.aggregate!)
+      node.aggregate = this.aggregator.combine(childAggregates)
+    }
+  }
+
+  private clearRecursive(node: QuadTreeNode<TElement, TAggregate>) {
+    if (!node.isEmpty) {
+      node.isEmpty = true
+      if (!node.isLeaf) {
+        for (let child of node.children()) {
+          this.clearRecursive(child)
+        }
+      }
+      node.elements = []
+      node.aggregate = null;
     }
   }
 }
