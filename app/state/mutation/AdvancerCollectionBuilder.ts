@@ -11,9 +11,9 @@ export default class AdvancerCollectionBuilder {
   static createDefault(width: number, height: number): Advancer {
 
     let advancers: Advancer[] = [
-      new WallBounceAdvancer(0.8, width, height),
-      new QuadTreeGravityAdvancer(0.001, new Vector2d(width, height)),
-      //new GravityAdvancer(0.08),
+      new WallBounceAdvancer(0.5, width, height),
+      new QuadTreeGravityAdvancer(0.05, new Vector2d(width, height)),
+      //new GravityAdvancer(0.05),
       new BasicAdvancer()
     ];
 

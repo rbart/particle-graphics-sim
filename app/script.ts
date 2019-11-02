@@ -31,7 +31,7 @@ for (var i = 0; i < 5000; i++) {
   particles.push(particle);
 }
 
-let renderer: Renderer = RendererBuilder.createDefault(ctx, c.width, c.height, 0.3);
+let renderer: Renderer = RendererBuilder.createDefault(ctx, c.width, c.height, 0.8);
 
 renderer.initialize();
 

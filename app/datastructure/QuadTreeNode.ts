@@ -10,6 +10,7 @@ export default class QuadTreeNode<
   public isLeaf: boolean;
   public aggregate: TAggregate | null = null
   public isEmpty: boolean = true
+  public em: number // TODO rename this and move it into QuadTree
 
   constructor(
     public origin: Vector2d,
@@ -19,6 +20,7 @@ export default class QuadTreeNode<
     public lowerLeft: QuadTreeNode<TElement, TAggregate> | null = null,
     public lowerRight: QuadTreeNode<TElement, TAggregate> | null = null) {
       this.isLeaf = upperLeft == null && upperRight == null && lowerLeft == null && lowerRight == null
+      this.em = extents.length() / 5
     }
 
   children(): QuadTreeNode<TElement, TAggregate>[] {
@@ -34,35 +36,12 @@ export default class QuadTreeNode<
       position.y < this.origin.y + this.extents.y;
   }
 
-  // containingNode(position: Vector2d): QuadTreeNode<TElement> | null {
-  //   if (this.isLeaf) {
-  //     return this
-  //   } else {
-  //     for (let child of this.children()) {
-  //       if (child.contains(position)) {
-  //         return child.containingNode(position)
-  //       }
-  //     }
-  //     return null;
-  //   }
-  // }
-
-  // allNonIntersectingNodes(position: Vector2d): QuadTreeNode<TElement>[] {
-  //   if (!this.contains(position) && this.elements != null && this.extents.x < 200) {
-  //     return [this]
-  //   }
-  //   else if (!this.isLeaf) {
-  //     return [...this.children()].map(child => child.allNonIntersectingNodes(position)).reduce((a,b) => a.concat(b))
-  //   } else {
-  //     return []
-  //   }
-  // }
-
-  // abstract [Symbol.iterator](): Iterator<TElement>
-  //
-  // abstract allNodes(): Iterable<QuadTreeNode<TElement>>
-  //
-  // abstract allLeafNodes(): Iterable<QuadTreeNode<TElement>>
-  //
-  // abstract allNonIntersectingNodes(position: Vector2d): Iterable<QuadTreeNode<TElement>>
+  containsMore(element: HasPosition2d): boolean {
+    let position = element.position()
+    let num = this.em
+    return position.x >= this.origin.x - num &&
+      position.x < this.origin.x + this.extents.x + num &&
+      position.y >= this.origin.y - num &&
+      position.y < this.origin.y + this.extents.y + num;
+  }
 }

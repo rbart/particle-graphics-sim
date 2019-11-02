@@ -8,13 +8,15 @@ import Vector2d from '../Vector2d'
 
 export default class QuadTreeGravityAdvancer implements Advancer {
 
-  private minNodeSize: number = 100
   private quadTree: QuadTree<Particle, ParticleAggregate, ParticleAggregator>
 
   constructor(readonly gravityCoef: number, readonly extents: Vector2d) {
     let aggregator = new ParticleAggregator()
+    // divide the screen up into a roughly 20x20 grid at the leaf level.
+    // TODO: move this into a builder and/or constants file.
+    let minNodeSize = extents.length() / 20
     let quadTreeBuilder = new QuadTreeBuilder<Particle, ParticleAggregate, ParticleAggregator>(
-      aggregator, this.minNodeSize)
+      aggregator, minNodeSize)
     this.quadTree = quadTreeBuilder.build(extents)
   }
 
@@ -35,7 +37,7 @@ export default class QuadTreeGravityAdvancer implements Advancer {
 
   private applyGravityRecursive(particle: Particle, node: QuadTreeNode<Particle, ParticleAggregate>) {
     if (node.isEmpty) return
-    let contained = node.contains(particle)
+    let contained = node.containsMore(particle)
     if (contained && node.isLeaf) {
       for (let other of node.elements) {
         if (other == particle) continue
