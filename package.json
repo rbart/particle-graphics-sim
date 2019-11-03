@@ -9,7 +9,8 @@
     "build": "webpack --config webpack.config.js --mode=production",
     "build:dev": "webpack --config webpack.config.js --mode=development",
     "watch": "webpack --config webpack.config.js --mode=development --watch",
-    "start": "node server.js"
+    "start": "node server.js",
+    "deploy": "gh-pages -d app"
   },
   "author": "",
   "license": "ISC",
@@ -29,6 +30,7 @@
     "@types/webpack-env": "^1.13.9",
     "awesome-typescript-loader": "^5.2.1",
     "chai": "^4.2.0",
+    "gh-pages": "^2.1.1",
     "mocha": "^6.1.4",
     "requirejs": "^2.3.6",
     "sinon": "^7.3.2",
