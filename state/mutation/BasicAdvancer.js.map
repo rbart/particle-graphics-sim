@@ -1,0 +1,1 @@
+{"version":3,"file":"BasicAdvancer.js","sourceRoot":"","sources":["BasicAdvancer.ts"],"names":[],"mappings":";;AAGA,MAAqB,aAAa;IAChC,OAAO,CAAC,SAAqB;QAC3B,KAAK,IAAI,QAAQ,IAAI,SAAS,EAAG;YAC/B,QAAQ,CAAC,GAAG,CAAC,SAAS,CAAC,QAAQ,CAAC,GAAG,CAAC,CAAC;SACtC;IACH,CAAC;CACF;AAND,gCAMC"}
