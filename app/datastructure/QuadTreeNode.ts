@@ -1,31 +1,45 @@
 import HasPosition2d from '../state/HasPosition2d'
-import { Aggregate } from './QuadTreeBuilder'
 import Vector2d from '../state/Vector2d'
 
-export default class QuadTreeNode<
-  TElement extends HasPosition2d,
-  TAggregate extends Aggregate<TElement>> {
+export interface Visitor <TElement extends HasPosition2d> {
+  visit(node: QuadTreeNode<TElement>): void
+  visitLeaf(node: QuadTreeLeafNode<TElement>): void
+}
 
+export interface IQuadTreeNode<TElement extends HasPosition2d> {
+  origin: Vector2d
+  extents: Vector2d
+  isEmpty: boolean
+  elements: TElement[]
+  aggregate: TElement | null
+  accept(visitor: Visitor<TElement>): void
+  add(element: TElement): void
+  clear(): void
+  contains(element: HasPosition2d): boolean,
+}
+
+export class QuadTreeLeafNode<TElement extends HasPosition2d> implements IQuadTreeNode<TElement> {
   public elements: TElement[] = []
-  public isLeaf: boolean;
-  public aggregate: TAggregate | null = null
+  public aggregate: TElement | null = null
   public isEmpty: boolean = true
-  public em: number // TODO rename this and move it into QuadTree
 
   constructor(
-    public origin: Vector2d,
-    public extents: Vector2d,
-    public upperLeft: QuadTreeNode<TElement, TAggregate> | null = null,
-    public upperRight: QuadTreeNode<TElement, TAggregate> | null = null,
-    public lowerLeft: QuadTreeNode<TElement, TAggregate> | null = null,
-    public lowerRight: QuadTreeNode<TElement, TAggregate> | null = null) {
-      this.isLeaf = upperLeft == null && upperRight == null && lowerLeft == null && lowerRight == null
-      this.em = extents.length() / 5
-    }
+    public readonly origin: Vector2d,
+    public readonly extents: Vector2d) { }
 
-  children(): QuadTreeNode<TElement, TAggregate>[] {
-    if (this.isLeaf) return []
-    else return [this.upperLeft!, this.upperRight!, this.lowerLeft!, this.lowerRight!]
+  accept(visitor: Visitor<TElement>) {
+    visitor.visitLeaf(this)
+  }
+
+  add(element: TElement) {
+    this.isEmpty = false
+    this.elements.push(element)
+  }
+
+  clear() {
+    this.elements.length = 0
+    this.aggregate = null
+    this.isEmpty = true
   }
 
   contains(element: HasPosition2d): boolean {
@@ -35,13 +49,47 @@ export default class QuadTreeNode<
       position.y >= this.origin.y &&
       position.y < this.origin.y + this.extents.y;
   }
+}
 
-  containsMore(element: HasPosition2d): boolean {
-    let position = element.position()
-    let num = this.em
-    return position.x >= this.origin.x - num &&
-      position.x < this.origin.x + this.extents.x + num &&
-      position.y >= this.origin.y - num &&
-      position.y < this.origin.y + this.extents.y + num;
+export class QuadTreeNode<TElement extends HasPosition2d>
+  extends QuadTreeLeafNode<TElement> implements IQuadTreeNode<TElement> {
+
+  constructor(
+    public readonly origin: Vector2d,
+    public readonly extents: Vector2d,
+    public readonly upperLeft: IQuadTreeNode<TElement>,
+    public readonly upperRight: IQuadTreeNode<TElement>,
+    public readonly lowerLeft: IQuadTreeNode<TElement>,
+    public readonly lowerRight: IQuadTreeNode<TElement>) {
+
+    super(origin, extents)
+  }
+
+  accept(visitor: Visitor<TElement>) {
+    visitor.visit(this)
+  }
+
+  add(element: TElement) {
+    this.isEmpty = false
+    for (let child of this.children()) {
+      if (child.contains(element)) {
+        child.add(element)
+        break
+      }
+    }
+  }
+
+  *children(): Iterable<IQuadTreeNode<TElement>> {
+    yield this.upperLeft
+    yield this.upperRight
+    yield this.lowerLeft
+    yield this.lowerRight
+  }
+
+  clear() {
+    super.clear()
+    for (let child of this.children()) {
+      child.clear()
+    }
   }
 }

@@ -6,6 +6,7 @@ export default class Particle implements HasPosition2d {
   constructor(
     readonly pos: Vector2d,
     readonly spd: Vector2d,
+    readonly mass: number,
     readonly rad: number,
     readonly color: Vector3d) { }
 

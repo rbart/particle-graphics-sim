@@ -12,8 +12,8 @@ export default class AdvancerCollectionBuilder {
 
     let advancers: Advancer[] = [
       new WallBounceAdvancer(0.5, width, height),
-      new QuadTreeGravityAdvancer(0.05, new Vector2d(width, height)),
-      //new GravityAdvancer(0.05),
+      new QuadTreeGravityAdvancer(0.005, new Vector2d(width, height)),
+      //new GravityAdvancer(0.005),
       new BasicAdvancer()
     ];
 

@@ -1,7 +1,14 @@
-export default class Vector2d {
+import HasPosition2d from "./HasPosition2d";
+
+export default class Vector2d implements HasPosition2d {
+
   constructor(
     public x: number,
     public y: number) { }
+
+    position(): Vector2d {
+      return this
+    }
 
     equals(other: Vector2d): boolean {
       return this.x == other.x && this.y == other.y;

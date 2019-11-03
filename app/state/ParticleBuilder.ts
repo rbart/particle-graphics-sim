@@ -19,7 +19,7 @@ export default class ParticleBuilder {
       Math.random() * maxSpeed * 2 - maxSpeed,
     );
     return new Particle(
-      randomPosition, randomSpeed, radius, this.getRndColor()
+      randomPosition, randomSpeed, radius, radius, this.getRndColor()
     );
   }
 
