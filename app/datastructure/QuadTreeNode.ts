@@ -1,24 +1,20 @@
 import HasPosition2d from '../state/HasPosition2d'
 import Vector2d from '../state/Vector2d'
+import QuadTreeVisitor from './QuadTreeVisitor'
 
-export interface Visitor <TElement extends HasPosition2d> {
-  visit(node: QuadTreeNode<TElement>): void
-  visitLeaf(node: QuadTreeLeafNode<TElement>): void
-}
-
-export interface IQuadTreeNode<TElement extends HasPosition2d> {
+export interface QuadTreeNode<TElement extends HasPosition2d> {
   origin: Vector2d
   extents: Vector2d
   isEmpty: boolean
   elements: TElement[]
   aggregate: TElement | null
-  accept(visitor: Visitor<TElement>): void
+  accept(visitor: QuadTreeVisitor<TElement>): void
   add(element: TElement): void
   clear(): void
   contains(element: HasPosition2d): boolean,
 }
 
-export class QuadTreeLeafNode<TElement extends HasPosition2d> implements IQuadTreeNode<TElement> {
+export class QuadTreeLeafNode<TElement extends HasPosition2d> implements QuadTreeNode<TElement> {
   public elements: TElement[] = []
   public aggregate: TElement | null = null
   public isEmpty: boolean = true
@@ -27,7 +23,7 @@ export class QuadTreeLeafNode<TElement extends HasPosition2d> implements IQuadTr
     public readonly origin: Vector2d,
     public readonly extents: Vector2d) { }
 
-  accept(visitor: Visitor<TElement>) {
+  accept(visitor: QuadTreeVisitor<TElement>) {
     visitor.visitLeaf(this)
   }
 
@@ -51,21 +47,21 @@ export class QuadTreeLeafNode<TElement extends HasPosition2d> implements IQuadTr
   }
 }
 
-export class QuadTreeNode<TElement extends HasPosition2d>
-  extends QuadTreeLeafNode<TElement> implements IQuadTreeNode<TElement> {
+export class QuadTreeInnerNode<TElement extends HasPosition2d>
+  extends QuadTreeLeafNode<TElement> implements QuadTreeNode<TElement> {
 
   constructor(
     public readonly origin: Vector2d,
     public readonly extents: Vector2d,
-    public readonly upperLeft: IQuadTreeNode<TElement>,
-    public readonly upperRight: IQuadTreeNode<TElement>,
-    public readonly lowerLeft: IQuadTreeNode<TElement>,
-    public readonly lowerRight: IQuadTreeNode<TElement>) {
+    public readonly upperLeft: QuadTreeNode<TElement>,
+    public readonly upperRight: QuadTreeNode<TElement>,
+    public readonly lowerLeft: QuadTreeNode<TElement>,
+    public readonly lowerRight: QuadTreeNode<TElement>) {
 
     super(origin, extents)
   }
 
-  accept(visitor: Visitor<TElement>) {
+  accept(visitor: QuadTreeVisitor<TElement>) {
     visitor.visit(this)
   }
 
@@ -79,7 +75,7 @@ export class QuadTreeNode<TElement extends HasPosition2d>
     }
   }
 
-  *children(): Iterable<IQuadTreeNode<TElement>> {
+  *children(): Iterable<QuadTreeNode<TElement>> {
     yield this.upperLeft
     yield this.upperRight
     yield this.lowerLeft

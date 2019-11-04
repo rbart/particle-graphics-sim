@@ -1,13 +1,13 @@
 import HasPosition2d from '../state/HasPosition2d'
 import Vector2d from '../state/Vector2d'
 import Vector3d from '../state/Vector3d'
-import { IQuadTreeNode, QuadTreeLeafNode, QuadTreeNode } from './QuadTreeNode'
+import { QuadTreeNode, QuadTreeLeafNode, QuadTreeInnerNode } from './QuadTreeNode'
 import Particle from '../state/Particle'
-import { Visitor }  from './QuadTreeNode'
+import QuadTreeVisitor from './QuadTreeVisitor'
 
-export class ParticleAggregatorVisitor implements Visitor<Particle> {
+export class ParticleAggregatorVisitor implements QuadTreeVisitor<Particle> {
 
-  visit(node: QuadTreeNode<Particle>): void {
+  visit(node: QuadTreeInnerNode<Particle>): void {
     if (node.isEmpty) {
       return
     }
@@ -44,9 +44,9 @@ export class ParticleAggregatorVisitor implements Visitor<Particle> {
 
 export class QuadTree<
   TElement extends HasPosition2d,
-  TAggregator extends Visitor<TElement>> {
+  TAggregator extends QuadTreeVisitor<TElement>> {
 
-  constructor(public root: IQuadTreeNode<TElement>, private aggregator: TAggregator) {}
+  constructor(public root: QuadTreeNode<TElement>, private aggregator: TAggregator) {}
 
   add(element: TElement) {
     this.root.add(element)
@@ -63,7 +63,7 @@ export class QuadTree<
 
 export default class QuadTreeBuilder<
   TElement extends HasPosition2d,
-  TAggregator extends Visitor<TElement>> {
+  TAggregator extends QuadTreeVisitor<TElement>> {
 
   constructor(private aggregator: TAggregator, private minNodeSize: number) {}
 
@@ -71,14 +71,14 @@ export default class QuadTreeBuilder<
     return new QuadTree(this.buildImpl(new Vector2d(0,0), extents), this.aggregator);
   }
 
-  private buildImpl(origin: Vector2d, extents: Vector2d): IQuadTreeNode<TElement> {
+  private buildImpl(origin: Vector2d, extents: Vector2d): QuadTreeNode<TElement> {
     if (extents.length() >= this.minNodeSize) {
       let halfExtent = extents.multiply(0.5)
       let upperLeft = this.buildImpl(origin, halfExtent)
       let upperRight = this.buildImpl(origin.addX(halfExtent.x), halfExtent)
       let lowerLeft = this.buildImpl(origin.addY(halfExtent.y), halfExtent)
       let lowerRight = this.buildImpl(origin.add(halfExtent), halfExtent)
-      return new QuadTreeNode<TElement>(
+      return new QuadTreeInnerNode<TElement>(
         origin, extents, upperLeft, upperRight, lowerLeft, lowerRight)
     } else {
       return new QuadTreeLeafNode<TElement>(origin, extents)

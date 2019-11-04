@@ -1,16 +1,17 @@
 import Advancer from './Advancer'
 import Particle from '../Particle'
-import { IQuadTreeNode, QuadTreeNode, QuadTreeLeafNode, Visitor } from '../../datastructure/QuadTreeNode'
+import { QuadTreeNode, QuadTreeInnerNode, QuadTreeLeafNode } from '../../datastructure/QuadTreeNode'
 import QuadTreeBuilder from '../../datastructure/QuadTreeBuilder'
+import QuadTreeVisitor from '../../datastructure/QuadTreeVisitor'
 import { QuadTree, ParticleAggregatorVisitor } from '../../datastructure/QuadTreeBuilder'
 
 import Vector2d from '../Vector2d'
 
-class GravityVisitor implements Visitor<Particle> {
+class GravityVisitor implements QuadTreeVisitor<Particle> {
 
   constructor(private readonly particle: Particle, private readonly gravityCoef: number) { }
 
-  visit(node: QuadTreeNode<Particle>): void {
+  visit(node: QuadTreeInnerNode<Particle>): void {
     if (node.isEmpty) return
     let canApplyAggregate = this.canApplyAggregate(node)
     if (!canApplyAggregate) {
@@ -36,7 +37,7 @@ class GravityVisitor implements Visitor<Particle> {
     }
   }
 
-  private canApplyAggregate(node: IQuadTreeNode<Particle>): boolean {
+  private canApplyAggregate(node: QuadTreeNode<Particle>): boolean {
     let position = this.particle.position()
     let bufferWidth = Math.max(node.extents.x, node.extents.y) / 4
     let contains = position.x >= node.origin.x - bufferWidth &&
@@ -55,7 +56,7 @@ export default class QuadTreeGravityAdvancer implements Advancer {
     let aggregator = new ParticleAggregatorVisitor()
     // divide the screen up into a roughly 20x20 grid at the leaf level.
     // TODO: move this into a builder and/or constants file.
-    let minNodeSize = extents.length() / 20
+    let minNodeSize = 100 //extents.length() / 2
     let quadTreeBuilder = new QuadTreeBuilder<Particle, ParticleAggregatorVisitor>(
       aggregator, minNodeSize)
     this.quadTree = quadTreeBuilder.build(extents)
