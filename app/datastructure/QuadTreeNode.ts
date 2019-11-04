@@ -1,6 +1,6 @@
 import HasPosition2d from '../state/HasPosition2d'
 import Vector2d from '../state/Vector2d'
-import QuadTreeVisitor from './QuadTreeVisitor'
+import QuadTreeVisitor from '../state/mutation/QuadTreeVisitor'
 
 export interface QuadTreeNode<TElement extends HasPosition2d> {
   origin: Vector2d

@@ -1,74 +1,14 @@
 import HasPosition2d from '../state/HasPosition2d'
 import Vector2d from '../state/Vector2d'
-import Vector3d from '../state/Vector3d'
 import { QuadTreeNode, QuadTreeLeafNode, QuadTreeInnerNode } from './QuadTreeNode'
-import Particle from '../state/Particle'
-import QuadTreeVisitor from './QuadTreeVisitor'
 
-export class ParticleAggregatorVisitor implements QuadTreeVisitor<Particle> {
+export default class QuadTreeBuilder<TElement extends HasPosition2d> {
 
-  visit(node: QuadTreeInnerNode<Particle>): void {
-    if (node.isEmpty) {
-      return
-    }
-    let childAggregates: Particle[] = []
-    for (let child of node.children()) {
-      if (!child.isEmpty) {
-        child.accept(this)
-        childAggregates.push(child.aggregate!)
-      }
-    }
-    node.aggregate = this.aggregate(childAggregates)
-  }
+  constructor(private minNodeSize: number) { }
 
-  visitLeaf(node: QuadTreeLeafNode<Particle>): void {
-    if (node.isEmpty) return
-    node.aggregate = this.aggregate(node.elements)
-  }
-
-  private aggregate(particles: Particle[]): Particle {
-    let totalMass = 0
-    let sumX = 0
-    let sumY = 0
-    for (let particle of particles) {
-      totalMass += particle.mass
-      sumX += particle.pos.x * particle.mass
-      sumY += particle.pos.y * particle.mass
-    }
-    let avgX = totalMass == 0 ? 0 : sumX / totalMass
-    let avgY = totalMass == 0 ? 0 : sumY / totalMass
-    // TODO aggregate all the fields properly
-    return new Particle(new Vector2d(avgX, avgY), new Vector2d(0, 0), totalMass, totalMass, new Vector3d(0, 0, 0))
-  }
-}
-
-export class QuadTree<
-  TElement extends HasPosition2d,
-  TAggregator extends QuadTreeVisitor<TElement>> {
-
-  constructor(public root: QuadTreeNode<TElement>, private aggregator: TAggregator) {}
-
-  add(element: TElement) {
-    this.root.add(element)
-  }
-
-  computeAggregates() {
-    this.root.accept(this.aggregator)
-  }
-
-  clear() {
-    this.root.clear()
-  }
-}
-
-export default class QuadTreeBuilder<
-  TElement extends HasPosition2d,
-  TAggregator extends QuadTreeVisitor<TElement>> {
-
-  constructor(private aggregator: TAggregator, private minNodeSize: number) {}
-
-  build(extents: Vector2d): QuadTree<TElement, TAggregator> {
-    return new QuadTree(this.buildImpl(new Vector2d(0,0), extents), this.aggregator);
+  // TODO just pass a rectangle
+  build(extents: Vector2d): QuadTreeNode<TElement> {
+    return this.buildImpl(new Vector2d(0,0), extents)
   }
 
   private buildImpl(origin: Vector2d, extents: Vector2d): QuadTreeNode<TElement> {
