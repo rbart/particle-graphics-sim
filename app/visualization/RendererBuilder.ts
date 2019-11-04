@@ -22,7 +22,6 @@ export default class RendererBuilder {
       render(elements: Particle[]) {
         canvasRenderer.render(elements)
         quadTreeRenderer.render(elements)
-
       }
     }
     return renderer
