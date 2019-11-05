@@ -4,7 +4,7 @@ import { QuadTreeNode } from '../../datastructure/QuadTreeNode'
 import QuadTreeBuilder from '../../datastructure/QuadTreeBuilder'
 import Vector2d from '../Vector2d'
 import ParticleAggregationVisitor from './ParticleAggregationVisitor'
-import GravityVisitor from './ApplyGravityVisitor'
+import ApplyGravityVisitor from './ApplyGravityVisitor'
 
 export default class QuadTreeGravityAdvancer implements Advancer {
 
@@ -30,7 +30,7 @@ export default class QuadTreeGravityAdvancer implements Advancer {
     this.quadTree.accept(this.particleAggregator)
 
     for (let particle of particles) {
-      let gravityVisitor = new GravityVisitor(particle, this.gravityCoef)
+      let gravityVisitor = new ApplyGravityVisitor(particle, this.gravityCoef)
       this.quadTree.accept(gravityVisitor)
     }
   }

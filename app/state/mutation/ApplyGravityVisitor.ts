@@ -2,7 +2,7 @@ import Particle from "../Particle"
 import QuadTreeVisitor from "./QuadTreeVisitor"
 import { QuadTreeInnerNode, QuadTreeLeafNode, QuadTreeNode } from "../../datastructure/QuadTreeNode"
 
-export default class GravityVisitor implements QuadTreeVisitor<Particle> {
+export default class ApplyGravityVisitor implements QuadTreeVisitor<Particle> {
 
   constructor(private readonly particle: Particle, private readonly gravityCoef: number) { }
 
