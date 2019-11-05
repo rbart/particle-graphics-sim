@@ -50,6 +50,8 @@ export class QuadTreeLeafNode<TElement extends HasPosition2d> implements QuadTre
 export class QuadTreeInnerNode<TElement extends HasPosition2d>
   extends QuadTreeLeafNode<TElement> implements QuadTreeNode<TElement> {
 
+  private allChildrenEmpty: boolean
+
   constructor(
     public readonly origin: Vector2d,
     public readonly extents: Vector2d,
@@ -59,18 +61,36 @@ export class QuadTreeInnerNode<TElement extends HasPosition2d>
     public readonly lowerRight: QuadTreeNode<TElement>) {
 
     super(origin, extents)
+    this.allChildrenEmpty = true
   }
 
   accept(visitor: QuadTreeVisitor<TElement>) {
-    visitor.visit(this)
+    if (this.allChildrenEmpty) {
+      visitor.visitLeaf(this)
+    } else {
+      visitor.visit(this)
+    }
   }
 
   add(element: TElement) {
-    this.isEmpty = false
-    for (let child of this.children()) {
-      if (child.contains(element)) {
-        child.add(element)
-        break
+    if (this.isEmpty) {
+      this.isEmpty = false
+      this.elements.push(element)
+    }
+    else if (this.allChildrenEmpty) {
+      this.allChildrenEmpty = false
+      for (let priorElement of this.elements) {
+        this.add(priorElement)
+      }
+      this.elements.length = 0
+      this.add(element)
+    }
+    else {
+      for (let child of this.children()) {
+        if (child.contains(element)) {
+          child.add(element)
+          break
+        }
       }
     }
   }
@@ -83,9 +103,14 @@ export class QuadTreeInnerNode<TElement extends HasPosition2d>
   }
 
   clear() {
-    super.clear()
-    for (let child of this.children()) {
-      child.clear()
+    if (!this.isEmpty) {
+      super.clear()
+    }
+    if (!this.allChildrenEmpty) {
+      for (let child of this.children()) {
+        child.clear()
+      }
+      this.allChildrenEmpty = true
     }
   }
 }
