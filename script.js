@@ -19,11 +19,11 @@ c.addEventListener("click", fullscreen);
 let ctx = c.getContext("2d"); //ctx_temp!;
 let particles = [];
 let particleBuilder = new ParticleBuilder_1.default(c.width, c.height);
-for (var i = 0; i < 500; i++) {
+for (var i = 0; i < 5000; i++) {
     let particle = particleBuilder.generateRandomParticle(0.5, 1, 1);
     particles.push(particle);
 }
-let renderer = RendererBuilder_1.default.createDefault(ctx, c.width, c.height, 0.3);
+let renderer = RendererBuilder_1.default.createDefault(ctx, c.width, c.height, 0.8);
 renderer.initialize();
 let advancer = AdvancerCollectionBuilder_1.default.createDefault(c.width, c.height);
 function frame() {

@@ -2,57 +2,60 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const QuadTreeBuilder_1 = require("../../datastructure/QuadTreeBuilder");
 const QuadTreeBuilder_2 = require("../../datastructure/QuadTreeBuilder");
+class GravityVisitor {
+    constructor(particle, gravityCoef) {
+        this.particle = particle;
+        this.gravityCoef = gravityCoef;
+    }
+    visit(node) {
+        if (node.isEmpty)
+            return;
+        let contained = node.contains(this.particle);
+        if (contained) {
+            for (let child of node.children()) {
+                child.accept(this);
+            }
+        }
+        else {
+            for (let child of node.children()) {
+                this.apply([child.aggregate]);
+            }
+        }
+    }
+    visitLeaf(node) {
+        this.apply(node.elements);
+    }
+    apply(particles) {
+        for (let other of particles) {
+            if (other == this.particle)
+                continue;
+            let diff = this.particle.pos.subtract(other.pos);
+            let gravityStrength = 1.0 / (diff.lengthSquared()) * this.gravityCoef;
+            let gravityVector = diff.multiply(gravityStrength);
+            this.particle.spd.subtractMutate(gravityVector);
+        }
+    }
+}
 class QuadTreeGravityAdvancer {
     constructor(gravityCoef, extents) {
         this.gravityCoef = gravityCoef;
         this.extents = extents;
-        this.minNodeSize = 5;
-        let aggregator = new QuadTreeBuilder_2.ParticleAggregator();
-        let quadTreeBuilder = new QuadTreeBuilder_1.default(aggregator, this.minNodeSize);
+        let aggregator = new QuadTreeBuilder_2.ParticleAggregatorVisitor();
+        // divide the screen up into a roughly 20x20 grid at the leaf level.
+        // TODO: move this into a builder and/or constants file.
+        let minNodeSize = extents.length() / 20;
+        let quadTreeBuilder = new QuadTreeBuilder_1.default(aggregator, minNodeSize);
         this.quadTree = quadTreeBuilder.build(extents);
     }
     advance(particles) {
         this.quadTree.clear();
-        // for (let particle of particles) {
-        //   this.quadTree.add(particle)
-        // }
-        //
-        // this.quadTree.computeAggregates()
-        // for (let particle of particles) {
-        //   this.applyGravityRecursive(particle, this.quadTree.root)
-        // }
-    }
-    applyGravityRecursive(particle, node) {
-        let contained = node.contains(particle);
-        if (contained && node.isLeaf) {
-            // for (let other of node.elements) {
-            //   if (other == particle) continue
-            //   let diff = particle.pos.subtract(other.pos);
-            //   let gravityStrength = 1.0/(diff.lengthSquared()) * this.gravityCoef;
-            //   let gravityVector = diff.multiply(gravityStrength);
-            //   particle.spd.subtractMutate(gravityVector)
-            // }
+        for (let particle of particles) {
+            this.quadTree.add(particle);
         }
-        else if (contained) {
-            for (let child of node.children()) {
-                this.applyGravityRecursive(particle, child);
-            }
-        }
-        else {
-            // node does not contain child - recurse no further
-            let totalMass = node.aggregate.totalMass;
-            let aggLength = node.aggregate.centroid.length();
-            if (totalMass == 0)
-                return;
-            //if (aggLength == 0) return
-            if (!isFinite(totalMass))
-                return;
-            if (!isFinite(aggLength))
-                return;
-            let diff = particle.pos.subtract(node.aggregate.centroid);
-            let gravityStrength = node.aggregate.totalMass * 1.0 / (diff.lengthSquared()) * this.gravityCoef;
-            let gravityVector = diff.multiply(gravityStrength);
-            particle.spd.subtractMutate(gravityVector);
+        this.quadTree.computeAggregates();
+        for (let particle of particles) {
+            let gravityVisitor = new GravityVisitor(particle, this.gravityCoef);
+            this.quadTree.root.accept(gravityVisitor);
         }
     }
 }

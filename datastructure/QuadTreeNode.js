@@ -1,22 +1,24 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-class QuadTreeNode {
-    constructor(origin, extents, upperLeft = null, upperRight = null, lowerLeft = null, lowerRight = null) {
+class QuadTreeLeafNode {
+    constructor(origin, extents) {
         this.origin = origin;
         this.extents = extents;
-        this.upperLeft = upperLeft;
-        this.upperRight = upperRight;
-        this.lowerLeft = lowerLeft;
-        this.lowerRight = lowerRight;
         this.elements = [];
         this.aggregate = null;
-        this.isLeaf = upperLeft == null && upperRight == null && lowerLeft == null && lowerRight == null;
+        this.isEmpty = true;
     }
-    children() {
-        if (this.isLeaf)
-            return [];
-        else
-            return [this.upperLeft, this.upperRight, this.lowerLeft, this.lowerRight];
+    accept(visitor) {
+        visitor.visitLeaf(this);
+    }
+    add(element) {
+        this.isEmpty = false;
+        this.elements.push(element);
+    }
+    clear() {
+        this.elements.length = 0;
+        this.aggregate = null;
+        this.isEmpty = true;
     }
     contains(element) {
         let position = element.position();
@@ -26,5 +28,45 @@ class QuadTreeNode {
             position.y < this.origin.y + this.extents.y;
     }
 }
-exports.default = QuadTreeNode;
+exports.QuadTreeLeafNode = QuadTreeLeafNode;
+class QuadTreeNode extends QuadTreeLeafNode {
+    constructor(origin, extents, upperLeft, upperRight, lowerLeft, lowerRight) {
+        super(origin, extents);
+        this.origin = origin;
+        this.extents = extents;
+        this.upperLeft = upperLeft;
+        this.upperRight = upperRight;
+        this.lowerLeft = lowerLeft;
+        this.lowerRight = lowerRight;
+    }
+    accept(visitor) {
+        visitor.visit(this);
+    }
+    add(element) {
+        if (this.isEmpty) {
+            super.add(element);
+        }
+        else {
+            for (let child of this.children()) {
+                if (child.contains(element)) {
+                    child.add(element);
+                    break;
+                }
+            }
+        }
+    }
+    *children() {
+        yield this.upperLeft;
+        yield this.upperRight;
+        yield this.lowerLeft;
+        yield this.lowerRight;
+    }
+    clear() {
+        super.clear();
+        for (let child of this.children()) {
+            child.clear();
+        }
+    }
+}
+exports.QuadTreeNode = QuadTreeNode;
 //# sourceMappingURL=QuadTreeNode.js.map

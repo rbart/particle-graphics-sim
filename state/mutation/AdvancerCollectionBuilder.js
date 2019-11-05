@@ -8,9 +8,9 @@ const AdvancerCollection_1 = require("./AdvancerCollection");
 class AdvancerCollectionBuilder {
     static createDefault(width, height) {
         let advancers = [
-            new WallBounceAdvancer_1.default(0.8, width, height),
-            new QuadTreeGravityAdvancer_1.default(0.08, new Vector2d_1.default(width, height)),
-            //new GravityAdvancer(0.08),
+            new WallBounceAdvancer_1.default(0.5, width, height),
+            new QuadTreeGravityAdvancer_1.default(0.05, new Vector2d_1.default(width, height)),
+            //new GravityAdvancer(0.05),
             new BasicAdvancer_1.default()
         ];
         return new AdvancerCollection_1.default(advancers);

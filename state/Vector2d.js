@@ -5,6 +5,9 @@ class Vector2d {
         this.x = x;
         this.y = y;
     }
+    position() {
+        return this;
+    }
     equals(other) {
         return this.x == other.x && this.y == other.y;
     }

@@ -98,111 +98,13 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const Vector2d_1 = __webpack_require__(/*! ../state/Vector2d */ "./app/state/Vector2d.ts");
 const QuadTreeNode_1 = __webpack_require__(/*! ./QuadTreeNode */ "./app/datastructure/QuadTreeNode.ts");
-class ParticleAggregate {
-    constructor(centroid, totalMass) {
-        this.centroid = centroid;
-        this.totalMass = totalMass;
-    }
-}
-exports.ParticleAggregate = ParticleAggregate;
-class ParticleAggregator {
-    aggregate(particles) {
-        let totalMass = 0;
-        let sumX = 0;
-        let sumY = 0;
-        for (let particle of particles) {
-            totalMass += 1;
-            sumX += particle.pos.x;
-            sumY += particle.pos.y;
-        }
-        let avgX = totalMass == 0 ? 0 : sumX / totalMass;
-        let avgY = totalMass == 0 ? 0 : sumY / totalMass;
-        return new ParticleAggregate(new Vector2d_1.default(avgX, avgY), totalMass);
-    }
-    combine(aggregates) {
-        let totalMass = 0;
-        let sumX = 0;
-        let sumY = 0;
-        for (let agg of aggregates) {
-            if (agg.totalMass == 0)
-                continue;
-            totalMass += agg.totalMass;
-            sumX += agg.centroid.x * agg.totalMass;
-            sumY += agg.centroid.y * agg.totalMass;
-        }
-        let avgX = sumX / totalMass;
-        let avgY = sumY / totalMass;
-        return new ParticleAggregate(new Vector2d_1.default(avgX, avgY), totalMass);
-    }
-}
-exports.ParticleAggregator = ParticleAggregator;
-class QuadTree {
-    constructor(root, aggregator) {
-        this.root = root;
-        this.aggregator = aggregator;
-    }
-    add(element) {
-        this.addRecursive(element, this.root);
-    }
-    computeAggregates() {
-        this.computeAggregatesRecursive(this.root);
-    }
-    clear() {
-        this.clearRecursive(this.root);
-    }
-    addRecursive(element, node) {
-        node.isEmpty = false;
-        if (node.isLeaf) {
-            node.elements.push(element);
-        }
-        else {
-            let children = [node.upperLeft, node.upperRight, node.lowerLeft, node.lowerRight];
-            for (let child of children) {
-                if (child.contains(element)) {
-                    this.addRecursive(element, child);
-                    break;
-                }
-            }
-        }
-    }
-    computeAggregatesRecursive(node) {
-        if (node.isEmpty) {
-            node.aggregate = this.aggregator.aggregate(node.elements);
-            return;
-        }
-        else if (node.isLeaf) {
-            node.aggregate = this.aggregator.aggregate(node.elements);
-        }
-        else {
-            let children = node.children();
-            for (let child of children) {
-                this.computeAggregatesRecursive(child);
-            }
-            let childAggregates = children.map(c => c.aggregate);
-            node.aggregate = this.aggregator.combine(childAggregates);
-        }
-    }
-    clearRecursive(node) {
-        if (!node.isEmpty) {
-            node.isEmpty = true;
-            if (!node.isLeaf) {
-                for (let child of node.children()) {
-                    this.clearRecursive(child);
-                }
-            }
-            node.elements = [];
-            node.aggregate = null;
-        }
-    }
-}
-exports.QuadTree = QuadTree;
 class QuadTreeBuilder {
-    constructor(aggregator, minNodeSize) {
-        this.aggregator = aggregator;
+    constructor(minNodeSize) {
         this.minNodeSize = minNodeSize;
     }
+    // TODO just pass a rectangle
     build(extents) {
-        return new QuadTree(this.buildImpl(new Vector2d_1.default(0, 0), extents), this.aggregator);
+        return this.buildImpl(new Vector2d_1.default(0, 0), extents);
     }
     buildImpl(origin, extents) {
         if (extents.length() >= this.minNodeSize) {
@@ -211,10 +113,10 @@ class QuadTreeBuilder {
             let upperRight = this.buildImpl(origin.addX(halfExtent.x), halfExtent);
             let lowerLeft = this.buildImpl(origin.addY(halfExtent.y), halfExtent);
             let lowerRight = this.buildImpl(origin.add(halfExtent), halfExtent);
-            return new QuadTreeNode_1.default(origin, extents, upperLeft, upperRight, lowerLeft, lowerRight);
+            return new QuadTreeNode_1.QuadTreeInnerNode(origin, extents, upperLeft, upperRight, lowerLeft, lowerRight);
         }
         else {
-            return new QuadTreeNode_1.default(origin, extents);
+            return new QuadTreeNode_1.QuadTreeLeafNode(origin, extents);
         }
     }
 }
@@ -233,25 +135,25 @@ exports.default = QuadTreeBuilder;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-class QuadTreeNode {
-    constructor(origin, extents, upperLeft = null, upperRight = null, lowerLeft = null, lowerRight = null) {
+class QuadTreeLeafNode {
+    constructor(origin, extents) {
         this.origin = origin;
         this.extents = extents;
-        this.upperLeft = upperLeft;
-        this.upperRight = upperRight;
-        this.lowerLeft = lowerLeft;
-        this.lowerRight = lowerRight;
         this.elements = [];
         this.aggregate = null;
         this.isEmpty = true;
-        this.isLeaf = upperLeft == null && upperRight == null && lowerLeft == null && lowerRight == null;
-        this.em = extents.length() / 5;
     }
-    children() {
-        if (this.isLeaf)
-            return [];
-        else
-            return [this.upperLeft, this.upperRight, this.lowerLeft, this.lowerRight];
+    accept(visitor) {
+        visitor.visitLeaf(this);
+    }
+    add(element) {
+        this.isEmpty = false;
+        this.elements.push(element);
+    }
+    clear() {
+        this.elements.length = 0;
+        this.aggregate = null;
+        this.isEmpty = true;
     }
     contains(element) {
         let position = element.position();
@@ -260,16 +162,68 @@ class QuadTreeNode {
             position.y >= this.origin.y &&
             position.y < this.origin.y + this.extents.y;
     }
-    containsMore(element) {
-        let position = element.position();
-        let num = this.em;
-        return position.x >= this.origin.x - num &&
-            position.x < this.origin.x + this.extents.x + num &&
-            position.y >= this.origin.y - num &&
-            position.y < this.origin.y + this.extents.y + num;
+}
+exports.QuadTreeLeafNode = QuadTreeLeafNode;
+class QuadTreeInnerNode extends QuadTreeLeafNode {
+    constructor(origin, extents, upperLeft, upperRight, lowerLeft, lowerRight) {
+        super(origin, extents);
+        this.origin = origin;
+        this.extents = extents;
+        this.upperLeft = upperLeft;
+        this.upperRight = upperRight;
+        this.lowerLeft = lowerLeft;
+        this.lowerRight = lowerRight;
+        this.allChildrenEmpty = true;
+    }
+    accept(visitor) {
+        if (this.allChildrenEmpty) {
+            visitor.visitLeaf(this);
+        }
+        else {
+            visitor.visit(this);
+        }
+    }
+    add(element) {
+        if (this.isEmpty) {
+            this.isEmpty = false;
+            this.elements.push(element);
+        }
+        else if (this.allChildrenEmpty) {
+            this.allChildrenEmpty = false;
+            for (let priorElement of this.elements) {
+                this.add(priorElement);
+            }
+            this.elements.length = 0;
+            this.add(element);
+        }
+        else {
+            for (let child of this.children()) {
+                if (child.contains(element)) {
+                    child.add(element);
+                    break;
+                }
+            }
+        }
+    }
+    *children() {
+        yield this.upperLeft;
+        yield this.upperRight;
+        yield this.lowerLeft;
+        yield this.lowerRight;
+    }
+    clear() {
+        if (!this.isEmpty) {
+            super.clear();
+        }
+        if (!this.allChildrenEmpty) {
+            for (let child of this.children()) {
+                child.clear();
+            }
+            this.allChildrenEmpty = true;
+        }
     }
 }
-exports.default = QuadTreeNode;
+exports.QuadTreeInnerNode = QuadTreeInnerNode;
 
 
 /***/ }),
@@ -286,7 +240,7 @@ exports.default = QuadTreeNode;
 Object.defineProperty(exports, "__esModule", { value: true });
 const ParticleBuilder_1 = __webpack_require__(/*! ./state/ParticleBuilder */ "./app/state/ParticleBuilder.ts");
 const AdvancerCollectionBuilder_1 = __webpack_require__(/*! ./state/mutation/AdvancerCollectionBuilder */ "./app/state/mutation/AdvancerCollectionBuilder.ts");
-const RendererBuilder_1 = __webpack_require__(/*! ./visualization/RendererBuilder */ "./app/visualization/RendererBuilder.ts");
+const RendererCollectionBuilder_1 = __webpack_require__(/*! ./visualization/RendererCollectionBuilder */ "./app/visualization/RendererCollectionBuilder.ts");
 var c = document.getElementById("canvas");
 c.width = window.innerWidth;
 c.height = window.innerHeight;
@@ -303,11 +257,11 @@ c.addEventListener("click", fullscreen);
 let ctx = c.getContext("2d"); //ctx_temp!;
 let particles = [];
 let particleBuilder = new ParticleBuilder_1.default(c.width, c.height);
-for (var i = 0; i < 5000; i++) {
+for (var i = 0; i < 2000; i++) {
     let particle = particleBuilder.generateRandomParticle(0.5, 1, 1);
     particles.push(particle);
 }
-let renderer = RendererBuilder_1.default.createDefault(ctx, c.width, c.height, 0.8);
+let renderer = RendererCollectionBuilder_1.default.createDefault(ctx, c.width, c.height, 0.8);
 renderer.initialize();
 let advancer = AdvancerCollectionBuilder_1.default.createDefault(c.width, c.height);
 function frame() {
@@ -331,9 +285,10 @@ requestAnimationFrame(frame);
 
 Object.defineProperty(exports, "__esModule", { value: true });
 class Particle {
-    constructor(pos, spd, rad, color) {
+    constructor(pos, spd, mass, rad, color) {
         this.pos = pos;
         this.spd = spd;
+        this.mass = mass;
         this.rad = rad;
         this.color = color;
         this.hslColorString_memo = null;
@@ -375,7 +330,7 @@ class ParticleBuilder {
         let radius = Math.floor(Math.random() * (maxRadius - minRadius)) + minRadius;
         let randomPosition = new Vector2d_1.default(Math.floor(Math.random() * this.width - radius) + radius, Math.floor(Math.random() * this.height - radius) + radius);
         let randomSpeed = new Vector2d_1.default(Math.random() * maxSpeed * 2 - maxSpeed, Math.random() * maxSpeed * 2 - maxSpeed);
-        return new Particle_1.default(randomPosition, randomSpeed, radius, this.getRndColor());
+        return new Particle_1.default(randomPosition, randomSpeed, radius, radius, this.getRndColor());
     }
     getRndColor() {
         let hue = (360 * Math.random() | 0);
@@ -401,6 +356,9 @@ class Vector2d {
     constructor(x, y) {
         this.x = x;
         this.y = y;
+    }
+    position() {
+        return this;
     }
     equals(other) {
         return this.x == other.x && this.y == other.y;
@@ -513,14 +471,70 @@ class AdvancerCollectionBuilder {
     static createDefault(width, height) {
         let advancers = [
             new WallBounceAdvancer_1.default(0.5, width, height),
-            new QuadTreeGravityAdvancer_1.default(0.05, new Vector2d_1.default(width, height)),
-            //new GravityAdvancer(0.05),
+            new QuadTreeGravityAdvancer_1.default(0.01, new Vector2d_1.default(width, height)),
+            //new GravityAdvancer(0.005),
             new BasicAdvancer_1.default()
         ];
         return new AdvancerCollection_1.default(advancers);
     }
 }
 exports.default = AdvancerCollectionBuilder;
+
+
+/***/ }),
+
+/***/ "./app/state/mutation/ApplyGravityVisitor.ts":
+/*!***************************************************!*\
+  !*** ./app/state/mutation/ApplyGravityVisitor.ts ***!
+  \***************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+class ApplyGravityVisitor {
+    constructor(particle, gravityCoef) {
+        this.particle = particle;
+        this.gravityCoef = gravityCoef;
+    }
+    visit(node) {
+        if (node.isEmpty)
+            return;
+        let canApplyAggregate = this.canApplyAggregate(node);
+        if (!canApplyAggregate) {
+            for (let child of node.children()) {
+                child.accept(this);
+            }
+        }
+        else {
+            this.apply([node.aggregate]);
+        }
+    }
+    visitLeaf(node) {
+        this.apply(node.elements);
+    }
+    apply(particles) {
+        for (let other of particles) {
+            if (other == this.particle)
+                continue;
+            let diff = this.particle.pos.subtract(other.pos);
+            let gravityStrength = other.mass / (diff.lengthSquared()) * this.gravityCoef;
+            let gravityVector = diff.multiply(gravityStrength);
+            this.particle.spd.subtractMutate(gravityVector);
+        }
+    }
+    canApplyAggregate(node) {
+        let position = this.particle.position();
+        let bufferWidth = Math.max(node.extents.x, node.extents.y) / 4;
+        let contains = position.x >= node.origin.x - bufferWidth &&
+            position.x < node.origin.x + node.extents.x + bufferWidth &&
+            position.y >= node.origin.y - bufferWidth &&
+            position.y < node.origin.y + node.extents.y + bufferWidth;
+        return !contains;
+    }
+}
+exports.default = ApplyGravityVisitor;
 
 
 /***/ }),
@@ -547,6 +561,58 @@ exports.default = BasicAdvancer;
 
 /***/ }),
 
+/***/ "./app/state/mutation/ParticleAggregationVisitor.ts":
+/*!**********************************************************!*\
+  !*** ./app/state/mutation/ParticleAggregationVisitor.ts ***!
+  \**********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const Particle_1 = __webpack_require__(/*! ../Particle */ "./app/state/Particle.ts");
+const Vector2d_1 = __webpack_require__(/*! ../Vector2d */ "./app/state/Vector2d.ts");
+const Vector3d_1 = __webpack_require__(/*! ../Vector3d */ "./app/state/Vector3d.ts");
+class ParticleAggregationVisitor {
+    visit(node) {
+        if (node.isEmpty) {
+            return;
+        }
+        let childAggregates = [];
+        for (let child of node.children()) {
+            if (!child.isEmpty) {
+                child.accept(this);
+                childAggregates.push(child.aggregate);
+            }
+        }
+        node.aggregate = this.aggregate(childAggregates);
+    }
+    visitLeaf(node) {
+        if (node.isEmpty)
+            return;
+        node.aggregate = this.aggregate(node.elements);
+    }
+    aggregate(particles) {
+        let totalMass = 0;
+        let sumX = 0;
+        let sumY = 0;
+        for (let particle of particles) {
+            totalMass += particle.mass;
+            sumX += particle.pos.x * particle.mass;
+            sumY += particle.pos.y * particle.mass;
+        }
+        let avgX = totalMass == 0 ? 0 : sumX / totalMass;
+        let avgY = totalMass == 0 ? 0 : sumY / totalMass;
+        // TODO aggregate all the fields properly
+        return new Particle_1.default(new Vector2d_1.default(avgX, avgY), new Vector2d_1.default(0, 0), totalMass, totalMass, new Vector3d_1.default(0, 0, 0));
+    }
+}
+exports.default = ParticleAggregationVisitor;
+
+
+/***/ }),
+
 /***/ "./app/state/mutation/QuadTreeGravityAdvancer.ts":
 /*!*******************************************************!*\
   !*** ./app/state/mutation/QuadTreeGravityAdvancer.ts ***!
@@ -558,62 +624,27 @@ exports.default = BasicAdvancer;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const QuadTreeBuilder_1 = __webpack_require__(/*! ../../datastructure/QuadTreeBuilder */ "./app/datastructure/QuadTreeBuilder.ts");
-const QuadTreeBuilder_2 = __webpack_require__(/*! ../../datastructure/QuadTreeBuilder */ "./app/datastructure/QuadTreeBuilder.ts");
+const ParticleAggregationVisitor_1 = __webpack_require__(/*! ./ParticleAggregationVisitor */ "./app/state/mutation/ParticleAggregationVisitor.ts");
+const ApplyGravityVisitor_1 = __webpack_require__(/*! ./ApplyGravityVisitor */ "./app/state/mutation/ApplyGravityVisitor.ts");
 class QuadTreeGravityAdvancer {
     constructor(gravityCoef, extents) {
         this.gravityCoef = gravityCoef;
         this.extents = extents;
-        let aggregator = new QuadTreeBuilder_2.ParticleAggregator();
-        // divide the screen up into a roughly 20x20 grid at the leaf level.
         // TODO: move this into a builder and/or constants file.
-        let minNodeSize = extents.length() / 20;
-        let quadTreeBuilder = new QuadTreeBuilder_1.default(aggregator, minNodeSize);
+        let minNodeSize = extents.length() / 80;
+        let quadTreeBuilder = new QuadTreeBuilder_1.default(minNodeSize);
         this.quadTree = quadTreeBuilder.build(extents);
+        this.particleAggregator = new ParticleAggregationVisitor_1.default();
     }
     advance(particles) {
         this.quadTree.clear();
         for (let particle of particles) {
             this.quadTree.add(particle);
         }
-        this.quadTree.computeAggregates();
+        this.quadTree.accept(this.particleAggregator);
         for (let particle of particles) {
-            this.applyGravityRecursive(particle, this.quadTree.root);
-        }
-    }
-    applyGravityRecursive(particle, node) {
-        if (node.isEmpty)
-            return;
-        let contained = node.containsMore(particle);
-        if (contained && node.isLeaf) {
-            for (let other of node.elements) {
-                if (other == particle)
-                    continue;
-                let diff = particle.pos.subtract(other.pos);
-                let gravityStrength = 1.0 / (diff.lengthSquared()) * this.gravityCoef;
-                let gravityVector = diff.multiply(gravityStrength);
-                particle.spd.subtractMutate(gravityVector);
-            }
-        }
-        else if (contained) {
-            for (let child of node.children()) {
-                this.applyGravityRecursive(particle, child);
-            }
-        }
-        else {
-            // node does not contain child - recurse no further
-            let totalMass = node.aggregate.totalMass;
-            let aggLength = node.aggregate.centroid.length();
-            if (totalMass == 0)
-                return;
-            //if (aggLength == 0) return
-            if (!isFinite(totalMass))
-                return;
-            if (!isFinite(aggLength))
-                return;
-            let diff = particle.pos.subtract(node.aggregate.centroid);
-            let gravityStrength = node.aggregate.totalMass * 1.0 / (diff.lengthSquared()) * this.gravityCoef;
-            let gravityVector = diff.multiply(gravityStrength);
-            particle.spd.subtractMutate(gravityVector);
+            let gravityVisitor = new ApplyGravityVisitor_1.default(particle, this.gravityCoef);
+            this.quadTree.accept(gravityVisitor);
         }
     }
 }
@@ -672,17 +703,17 @@ exports.default = WallBounceAdvancer;
 
 /***/ }),
 
-/***/ "./app/visualization/CanvasRenderer.ts":
-/*!*********************************************!*\
-  !*** ./app/visualization/CanvasRenderer.ts ***!
-  \*********************************************/
+/***/ "./app/visualization/FadeRenderer.ts":
+/*!*******************************************!*\
+  !*** ./app/visualization/FadeRenderer.ts ***!
+  \*******************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-class CanvasRenderer {
+class FadeRenderer {
     constructor(ctx, width, height, fadeRate) {
         this.ctx = ctx;
         this.width = width;
@@ -694,8 +725,37 @@ class CanvasRenderer {
         this.ctx.fillStyle = "rgb(3,3,3)";
         this.ctx.fillRect(0, 0, this.width, this.height);
     }
+    render(_) {
+        let initialAlpha = this.ctx.globalAlpha;
+        this.ctx.globalAlpha = this.fadeRate;
+        this.ctx.fillStyle = "black";
+        this.ctx.fillRect(0, 0, this.width, this.height);
+        this.ctx.globalAlpha = initialAlpha;
+    }
+}
+exports.default = FadeRenderer;
+
+
+/***/ }),
+
+/***/ "./app/visualization/ParticleRenderer.ts":
+/*!***********************************************!*\
+  !*** ./app/visualization/ParticleRenderer.ts ***!
+  \***********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+class CanvasRenderer {
+    constructor(ctx, width, height) {
+        this.ctx = ctx;
+        this.width = width;
+        this.height = height;
+    }
+    initialize() { }
     render(particles) {
-        this.fade();
         for (let particle of particles) {
             this.ctx.strokeStyle = particle.hslColorString();
             this.ctx.lineWidth = particle.rad * 2;
@@ -716,13 +776,6 @@ class CanvasRenderer {
         }
         this.ctx.lineTo(lastPos.x, lastPos.y);
     }
-    fade() {
-        let initialAlpha = this.ctx.globalAlpha;
-        this.ctx.globalAlpha = this.fadeRate;
-        this.ctx.fillStyle = "black";
-        this.ctx.fillRect(0, 0, this.width, this.height);
-        this.ctx.globalAlpha = initialAlpha;
-    }
 }
 exports.default = CanvasRenderer;
 
@@ -740,21 +793,14 @@ exports.default = CanvasRenderer;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const QuadTreeBuilder_1 = __webpack_require__(/*! ../datastructure/QuadTreeBuilder */ "./app/datastructure/QuadTreeBuilder.ts");
-class NullAggregate {
-}
-NullAggregate.instance = new NullAggregate();
-class NullAggregator {
-    aggregate(elements) { return NullAggregate.instance; }
-    combine(aggregates) { return NullAggregate.instance; }
-}
 class QuadTreeRenderer {
     constructor(ctx, extents) {
         this.ctx = ctx;
         this.extents = extents;
         // TODO: don't create the quadtree at all here. We should reuse a single quadTree
         // throughout
-        let minNodeSize = extents.length() / 40;
-        let quadTreeBuilder = new QuadTreeBuilder_1.default(new NullAggregator(), minNodeSize);
+        let minNodeSize = extents.length() / 80;
+        let quadTreeBuilder = new QuadTreeBuilder_1.default(minNodeSize);
         this.quadTree = quadTreeBuilder.build(extents);
     }
     initialize() { }
@@ -763,57 +809,95 @@ class QuadTreeRenderer {
         for (let particle of particles) {
             this.quadTree.add(particle);
         }
+        let initialAlpha = this.ctx.globalAlpha;
         this.ctx.lineWidth = 0.5;
-        this.ctx.strokeStyle = "rgb(30,30,30)";
+        this.ctx.globalAlpha = 0.2;
+        this.ctx.strokeStyle = "rgb(100,100,100)";
         this.ctx.beginPath();
-        this.renderRecursive(this.quadTree.root);
+        let renderingVisitor = new RenderingVisitor(this.ctx);
+        this.quadTree.accept(renderingVisitor);
         this.ctx.stroke();
-    }
-    renderRecursive(node) {
-        this.ctx.rect(node.origin.x, node.origin.y, node.extents.x, node.extents.y);
-        if (!node.isEmpty) {
-            for (let child of node.children()) {
-                this.renderRecursive(child);
-            }
-        }
+        this.ctx.globalAlpha = initialAlpha;
     }
 }
 exports.default = QuadTreeRenderer;
+class RenderingVisitor {
+    constructor(ctx) {
+        this.ctx = ctx;
+    }
+    visit(node) {
+        if (!node.isEmpty) {
+            this.ctx.rect(node.origin.x, node.origin.y, node.extents.x, node.extents.y);
+            for (let child of node.children()) {
+                child.accept(this);
+            }
+        }
+    }
+    visitLeaf(node) {
+        if (!node.isEmpty) {
+            this.ctx.rect(node.origin.x, node.origin.y, node.extents.x, node.extents.y);
+        }
+    }
+}
 
 
 /***/ }),
 
-/***/ "./app/visualization/RendererBuilder.ts":
-/*!**********************************************!*\
-  !*** ./app/visualization/RendererBuilder.ts ***!
-  \**********************************************/
+/***/ "./app/visualization/RendererCollection.ts":
+/*!*************************************************!*\
+  !*** ./app/visualization/RendererCollection.ts ***!
+  \*************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const CanvasRenderer_1 = __webpack_require__(/*! ./CanvasRenderer */ "./app/visualization/CanvasRenderer.ts");
-const QuadTreeRenderer_1 = __webpack_require__(/*! ./QuadTreeRenderer */ "./app/visualization/QuadTreeRenderer.ts");
-const Vector2d_1 = __webpack_require__(/*! ../state/Vector2d */ "./app/state/Vector2d.ts");
-class RendererBuilder {
-    static createDefault(ctx, width, height, fadeRate) {
-        let canvasRenderer = new CanvasRenderer_1.default(ctx, width, height, fadeRate);
-        let quadTreeRenderer = new QuadTreeRenderer_1.default(ctx, new Vector2d_1.default(width, height));
-        let renderer = {
-            initialize() {
-                canvasRenderer.initialize();
-                quadTreeRenderer.initialize();
-            },
-            render(elements) {
-                canvasRenderer.render(elements);
-                quadTreeRenderer.render(elements);
-            }
-        };
-        return renderer;
+class RendererCollection {
+    constructor(renderers) {
+        this.renderers = renderers;
+    }
+    initialize() {
+        for (let renderer of this.renderers) {
+            renderer.initialize();
+        }
+    }
+    render(particles) {
+        for (let renderer of this.renderers) {
+            renderer.render(particles);
+        }
     }
 }
-exports.default = RendererBuilder;
+exports.default = RendererCollection;
+
+
+/***/ }),
+
+/***/ "./app/visualization/RendererCollectionBuilder.ts":
+/*!********************************************************!*\
+  !*** ./app/visualization/RendererCollectionBuilder.ts ***!
+  \********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const ParticleRenderer_1 = __webpack_require__(/*! ./ParticleRenderer */ "./app/visualization/ParticleRenderer.ts");
+const QuadTreeRenderer_1 = __webpack_require__(/*! ./QuadTreeRenderer */ "./app/visualization/QuadTreeRenderer.ts");
+const FadeRenderer_1 = __webpack_require__(/*! ./FadeRenderer */ "./app/visualization/FadeRenderer.ts");
+const Vector2d_1 = __webpack_require__(/*! ../state/Vector2d */ "./app/state/Vector2d.ts");
+const RendererCollection_1 = __webpack_require__(/*! ./RendererCollection */ "./app/visualization/RendererCollection.ts");
+class RendererCollectionBuilder {
+    static createDefault(ctx, width, height, fadeRate) {
+        return new RendererCollection_1.default([
+            new FadeRenderer_1.default(ctx, width, height, fadeRate),
+            new ParticleRenderer_1.default(ctx, width, height),
+            new QuadTreeRenderer_1.default(ctx, new Vector2d_1.default(width, height))
+        ]);
+    }
+}
+exports.default = RendererCollectionBuilder;
 
 
 /***/ })

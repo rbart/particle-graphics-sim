@@ -1,15 +1,21 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const Vector2d_1 = require("../state/Vector2d");
+const Vector3d_1 = require("../state/Vector3d");
 const QuadTreeNode_1 = require("./QuadTreeNode");
-class ParticleAggregate {
-    constructor(centroid, totalMass) {
-        this.centroid = centroid;
-        this.totalMass = totalMass;
+const Particle_1 = require("../state/Particle");
+class ParticleAggregatorVisitor {
+    visit(node) {
+        let childAggregates = [];
+        for (let child of node.children()) {
+            child.accept(this);
+            childAggregates.push(child.aggregate);
+        }
+        node.aggregate = this.aggregate(childAggregates);
     }
-}
-exports.ParticleAggregate = ParticleAggregate;
-class ParticleAggregator {
+    visitLeaf(node) {
+        node.aggregate = this.aggregate(node.elements);
+    }
     aggregate(particles) {
         let totalMass = 0;
         let sumX = 0;
@@ -21,74 +27,24 @@ class ParticleAggregator {
         }
         let avgX = totalMass == 0 ? 0 : sumX / totalMass;
         let avgY = totalMass == 0 ? 0 : sumY / totalMass;
-        return new ParticleAggregate(new Vector2d_1.default(avgX, avgY), totalMass);
-    }
-    combine(aggregates) {
-        let totalMass = 0;
-        let sumX = 0;
-        let sumY = 0;
-        for (let agg of aggregates) {
-            if (agg.totalMass == 0)
-                continue;
-            totalMass += agg.totalMass;
-            sumX += agg.centroid.x * agg.totalMass;
-            sumY += agg.centroid.y * agg.totalMass;
-        }
-        let avgX = sumX / totalMass;
-        let avgY = sumY / totalMass;
-        return new ParticleAggregate(new Vector2d_1.default(avgX, avgY), totalMass);
+        // TODO aggregate all the fields properly
+        return new Particle_1.default(new Vector2d_1.default(avgX, avgY), new Vector2d_1.default(0, 0), totalMass, 1, new Vector3d_1.default(0, 0, 0));
     }
 }
-exports.ParticleAggregator = ParticleAggregator;
+exports.ParticleAggregatorVisitor = ParticleAggregatorVisitor;
 class QuadTree {
     constructor(root, aggregator) {
         this.root = root;
         this.aggregator = aggregator;
     }
     add(element) {
-        this.addRecursive(element, this.root);
+        this.root.add(element);
     }
     computeAggregates() {
-        this.computeAggregatesRecursive(this.root);
+        this.root.accept(this.aggregator);
     }
     clear() {
-        this.clearRecursive(this.root);
-    }
-    addRecursive(element, node) {
-        if (node.isLeaf) {
-            node.elements.push(element);
-        }
-        else {
-            let children = [node.upperLeft, node.upperRight, node.lowerLeft, node.lowerRight];
-            for (let child of children) {
-                if (child.contains(element)) {
-                    this.addRecursive(element, child);
-                    break;
-                }
-            }
-        }
-    }
-    computeAggregatesRecursive(node) {
-        if (node.isLeaf) {
-            node.aggregate = this.aggregator.aggregate(node.elements);
-        }
-        else {
-            let children = node.children();
-            for (let child of children) {
-                this.computeAggregatesRecursive(child);
-            }
-            let childAggregates = children.map(c => c.aggregate);
-            node.aggregate = this.aggregator.combine(childAggregates);
-        }
-    }
-    clearRecursive(node) {
-        if (!node.isLeaf) {
-            for (let child of node.children()) {
-                this.clearRecursive(child);
-            }
-        }
-        node.elements = [];
-        node.aggregate = null;
+        this.root.clear();
     }
 }
 exports.QuadTree = QuadTree;
@@ -107,10 +63,10 @@ class QuadTreeBuilder {
             let upperRight = this.buildImpl(origin.addX(halfExtent.x), halfExtent);
             let lowerLeft = this.buildImpl(origin.addY(halfExtent.y), halfExtent);
             let lowerRight = this.buildImpl(origin.add(halfExtent), halfExtent);
-            return new QuadTreeNode_1.default(origin, extents, upperLeft, upperRight, lowerLeft, lowerRight);
+            return new QuadTreeNode_1.QuadTreeNode(origin, extents, upperLeft, upperRight, lowerLeft, lowerRight);
         }
         else {
-            return new QuadTreeNode_1.default(origin, extents);
+            return new QuadTreeNode_1.QuadTreeLeafNode(origin, extents);
         }
     }
 }

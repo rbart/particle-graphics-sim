@@ -1,9 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class Particle {
-    constructor(pos, spd, rad, color) {
+    constructor(pos, spd, mass, rad, color) {
         this.pos = pos;
         this.spd = spd;
+        this.mass = mass;
         this.rad = rad;
         this.color = color;
         this.hslColorString_memo = null;
