@@ -3,7 +3,7 @@ import ParticleBuilder from "./state/ParticleBuilder"
 import Advancer from "./state/mutation/Advancer"
 import AdvancerBuilder from "./state/mutation/AdvancerCollectionBuilder"
 import Renderer from "./visualization/Renderer"
-import RendererBuilder from "./visualization/RendererBuilder"
+import RendererCollectionBuilder from "./visualization/RendererCollectionBuilder"
 
 var c = <HTMLCanvasElement>document.getElementById("canvas");
 c.width  = window.innerWidth;
@@ -26,12 +26,12 @@ let particles: Particle[] = []
 
 let particleBuilder = new ParticleBuilder(c.width, c.height);
 
-for (var i = 0; i < 3000; i++) {
+for (var i = 0; i < 2000; i++) {
   let particle: Particle = particleBuilder.generateRandomParticle(0.5, 1, 1);
   particles.push(particle);
 }
 
-let renderer: Renderer = RendererBuilder.createDefault(ctx, c.width, c.height, 0.8);
+let renderer: Renderer = RendererCollectionBuilder.createDefault(ctx, c.width, c.height, 0.8);
 
 renderer.initialize();
 

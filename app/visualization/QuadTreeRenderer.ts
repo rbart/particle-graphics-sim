@@ -14,7 +14,7 @@ export default class QuadTreeRenderer implements Renderer {
     readonly extents: Vector2d)  {
     // TODO: don't create the quadtree at all here. We should reuse a single quadTree
     // throughout
-    let minNodeSize = extents.length() / 40
+    let minNodeSize = extents.length() / 80
     let quadTreeBuilder = new QuadTreeBuilder<Particle>(minNodeSize)
     this.quadTree = quadTreeBuilder.build(extents)
   }
@@ -30,8 +30,10 @@ export default class QuadTreeRenderer implements Renderer {
       this.quadTree.add(particle)
     }
 
+    let initialAlpha = this.ctx.globalAlpha;
     this.ctx.lineWidth = 0.5
-    this.ctx.strokeStyle = "rgb(30,30,30)";
+    this.ctx.globalAlpha = 0.2
+    this.ctx.strokeStyle = "rgb(100,100,100)";
     this.ctx.beginPath();
 
     let renderingVisitor = new RenderingVisitor(this.ctx)
@@ -39,6 +41,7 @@ export default class QuadTreeRenderer implements Renderer {
     this.quadTree.accept(renderingVisitor)
 
     this.ctx.stroke();
+    this.ctx.globalAlpha = initialAlpha
   }
 }
 

@@ -6,17 +6,11 @@ export default class CanvasRenderer implements Renderer {
   constructor(
     readonly ctx: CanvasRenderingContext2D,
     readonly width: number,
-    readonly height: number,
-    readonly fadeRate: number) { }
+    readonly height: number) { }
 
-  initialize() {
-    this.ctx.globalAlpha = 1;
-    this.ctx.fillStyle = "rgb(3,3,3)";
-    this.ctx.fillRect(0,0,this.width,this.height);
-  }
+  initialize() { }
 
   render(particles: Particle[]) {
-    this.fade()
     for (let particle of particles) {
       this.ctx.strokeStyle = particle.hslColorString();
       this.ctx.lineWidth = particle.rad * 2
@@ -37,13 +31,5 @@ export default class CanvasRenderer implements Renderer {
       lastPos = particle.pos.subtract(spdVect)
     }
     this.ctx.lineTo(lastPos.x, lastPos.y)
-  }
-
-  private fade(): void {
-    let initialAlpha = this.ctx.globalAlpha;
-    this.ctx.globalAlpha = this.fadeRate
-    this.ctx.fillStyle = "black"
-    this.ctx.fillRect(0,0,this.width,this.height)
-    this.ctx.globalAlpha = initialAlpha
   }
 }

@@ -12,9 +12,8 @@ export default class QuadTreeGravityAdvancer implements Advancer {
   private particleAggregator: ParticleAggregationVisitor
 
   constructor(readonly gravityCoef: number, readonly extents: Vector2d) {
-    // divide the screen up into a roughly 20x20 grid at the leaf level.
     // TODO: move this into a builder and/or constants file.
-    let minNodeSize = extents.length() / 20
+    let minNodeSize = extents.length() / 80
     let quadTreeBuilder = new QuadTreeBuilder<Particle>(minNodeSize)
     this.quadTree = quadTreeBuilder.build(extents)
     this.particleAggregator = new ParticleAggregationVisitor()
