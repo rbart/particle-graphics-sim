@@ -26,6 +26,7 @@ export default class ParticleAggregationVisitor implements QuadTreeVisitor<Parti
   }
 
   private aggregate(particles: Particle[]): Particle {
+    if (particles.length == 1) return particles[0]
     let totalMass = 0
     let sumX = 0
     let sumY = 0
