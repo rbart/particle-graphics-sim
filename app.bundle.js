@@ -257,11 +257,11 @@ c.addEventListener("click", fullscreen);
 let ctx = c.getContext("2d"); //ctx_temp!;
 let particles = [];
 let particleBuilder = new ParticleBuilder_1.default(c.width, c.height);
-for (var i = 0; i < 2000; i++) {
+for (var i = 0; i < 3500; i++) {
     let particle = particleBuilder.generateRandomParticle(0.5, 1, 1);
     particles.push(particle);
 }
-let renderer = RendererCollectionBuilder_1.default.createDefault(ctx, c.width, c.height, 0.8);
+let renderer = RendererCollectionBuilder_1.default.createDefault(ctx, c.width, c.height, 0.7);
 renderer.initialize();
 let advancer = AdvancerCollectionBuilder_1.default.createDefault(c.width, c.height);
 function frame() {
@@ -471,7 +471,7 @@ class AdvancerCollectionBuilder {
     static createDefault(width, height) {
         let advancers = [
             new WallBounceAdvancer_1.default(0.5, width, height),
-            new QuadTreeGravityAdvancer_1.default(0.01, new Vector2d_1.default(width, height)),
+            new QuadTreeGravityAdvancer_1.default(0.06, new Vector2d_1.default(width, height)),
             //new GravityAdvancer(0.005),
             new BasicAdvancer_1.default()
         ];
@@ -594,6 +594,8 @@ class ParticleAggregationVisitor {
         node.aggregate = this.aggregate(node.elements);
     }
     aggregate(particles) {
+        if (particles.length == 1)
+            return particles[0];
         let totalMass = 0;
         let sumX = 0;
         let sumY = 0;
@@ -782,67 +784,6 @@ exports.default = CanvasRenderer;
 
 /***/ }),
 
-/***/ "./app/visualization/QuadTreeRenderer.ts":
-/*!***********************************************!*\
-  !*** ./app/visualization/QuadTreeRenderer.ts ***!
-  \***********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const QuadTreeBuilder_1 = __webpack_require__(/*! ../datastructure/QuadTreeBuilder */ "./app/datastructure/QuadTreeBuilder.ts");
-class QuadTreeRenderer {
-    constructor(ctx, extents) {
-        this.ctx = ctx;
-        this.extents = extents;
-        // TODO: don't create the quadtree at all here. We should reuse a single quadTree
-        // throughout
-        let minNodeSize = extents.length() / 80;
-        let quadTreeBuilder = new QuadTreeBuilder_1.default(minNodeSize);
-        this.quadTree = quadTreeBuilder.build(extents);
-    }
-    initialize() { }
-    render(particles) {
-        this.quadTree.clear();
-        for (let particle of particles) {
-            this.quadTree.add(particle);
-        }
-        let initialAlpha = this.ctx.globalAlpha;
-        this.ctx.lineWidth = 0.5;
-        this.ctx.globalAlpha = 0.2;
-        this.ctx.strokeStyle = "rgb(100,100,100)";
-        this.ctx.beginPath();
-        let renderingVisitor = new RenderingVisitor(this.ctx);
-        this.quadTree.accept(renderingVisitor);
-        this.ctx.stroke();
-        this.ctx.globalAlpha = initialAlpha;
-    }
-}
-exports.default = QuadTreeRenderer;
-class RenderingVisitor {
-    constructor(ctx) {
-        this.ctx = ctx;
-    }
-    visit(node) {
-        if (!node.isEmpty) {
-            this.ctx.rect(node.origin.x, node.origin.y, node.extents.x, node.extents.y);
-            for (let child of node.children()) {
-                child.accept(this);
-            }
-        }
-    }
-    visitLeaf(node) {
-        if (!node.isEmpty) {
-            this.ctx.rect(node.origin.x, node.origin.y, node.extents.x, node.extents.y);
-        }
-    }
-}
-
-
-/***/ }),
-
 /***/ "./app/visualization/RendererCollection.ts":
 /*!*************************************************!*\
   !*** ./app/visualization/RendererCollection.ts ***!
@@ -884,16 +825,13 @@ exports.default = RendererCollection;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const ParticleRenderer_1 = __webpack_require__(/*! ./ParticleRenderer */ "./app/visualization/ParticleRenderer.ts");
-const QuadTreeRenderer_1 = __webpack_require__(/*! ./QuadTreeRenderer */ "./app/visualization/QuadTreeRenderer.ts");
 const FadeRenderer_1 = __webpack_require__(/*! ./FadeRenderer */ "./app/visualization/FadeRenderer.ts");
-const Vector2d_1 = __webpack_require__(/*! ../state/Vector2d */ "./app/state/Vector2d.ts");
 const RendererCollection_1 = __webpack_require__(/*! ./RendererCollection */ "./app/visualization/RendererCollection.ts");
 class RendererCollectionBuilder {
     static createDefault(ctx, width, height, fadeRate) {
         return new RendererCollection_1.default([
             new FadeRenderer_1.default(ctx, width, height, fadeRate),
             new ParticleRenderer_1.default(ctx, width, height),
-            new QuadTreeRenderer_1.default(ctx, new Vector2d_1.default(width, height))
         ]);
     }
 }
