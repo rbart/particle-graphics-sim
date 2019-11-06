@@ -1,7 +1,5 @@
-import { QuadTreeInnerNode, QuadTreeLeafNode } from "../../datastructure/QuadTreeNode"
+import { QuadTreeInnerNode, QuadTreeLeafNode, QuadTreeNode } from "../../datastructure/QuadTreeNode"
 import Particle from "../Particle"
-import Vector2d from "../Vector2d"
-import Vector3d from "../Vector3d"
 import QuadTreeVisitor from "./QuadTreeVisitor"
 import ParticleCollection from "../ParticleCollection"
 
@@ -18,16 +16,16 @@ export default class ParticleAggregationVisitor implements QuadTreeVisitor<Parti
         childAggregates.push(child.collection.aggregate)
       }
     }
-    node.collection.aggregate = this.aggregate(childAggregates)
+    this.aggregate(childAggregates, node)
   }
 
   visitLeaf(node: QuadTreeLeafNode<Particle, ParticleCollection>): void {
     if (node.isEmpty) return
-    node.collection.aggregate = this.aggregate(node.elements)
+    this.aggregate(node.elements, node)
   }
 
-  private aggregate(particles: Particle[]): Particle {
-    if (particles.length == 1) return particles[0]
+  private aggregate(particles: Particle[], node: QuadTreeNode<Particle, ParticleCollection>): void {
+    //if (particles.length == 1) return particles[0]
     let totalMass = 0
     let sumX = 0
     let sumY = 0
@@ -38,7 +36,10 @@ export default class ParticleAggregationVisitor implements QuadTreeVisitor<Parti
     }
     let avgX = totalMass == 0 ? 0 : sumX / totalMass
     let avgY = totalMass == 0 ? 0 : sumY / totalMass
-    // TODO aggregate all the fields properly
-    return new Particle(new Vector2d(avgX, avgY), new Vector2d(0, 0), totalMass, totalMass, new Vector3d(0, 0, 0))
+
+    let aggregate = node.collection.aggregate
+    aggregate.pos.x = avgX
+    aggregate.pos.y = avgY
+    aggregate.mass = totalMass
   }
 }

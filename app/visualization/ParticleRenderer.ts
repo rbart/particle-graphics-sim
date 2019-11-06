@@ -26,8 +26,8 @@ export default class CanvasRenderer implements Renderer {
     this.ctx.moveTo(particle.pos.x, particle.pos.y)
     let spdVect = particle.spd;
     let lengthSquared = spdVect.lengthSquared()
-    if (lengthSquared < 4) {
-      let shortage = 4 / lengthSquared
+    if (lengthSquared < 6) {
+      let shortage = 6 / lengthSquared
       spdVect = spdVect.multiply(Math.sqrt(shortage))
     }
     let lastPos: Vector2d = particle.pos.subtract(spdVect)

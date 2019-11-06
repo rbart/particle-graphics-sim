@@ -102,14 +102,14 @@ export class QuadTreeInnerNode<
   add(element: TElement) {
     if (this.isEmpty) {
       this.isEmpty = false
-      super.add(element)
+      this.elements.push(element)
     }
     else if (this.allChildrenEmpty) {
       this.allChildrenEmpty = false
       for (let priorElement of this.elements) {
         this.add(priorElement)
       }
-      this.clear()
+      this.elements.length = 0
       this.add(element)
     }
     else {
