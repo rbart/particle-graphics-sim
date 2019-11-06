@@ -8,10 +8,10 @@ export default class ApplyGravityVisitor implements QuadTreeVisitor<Particle, Pa
   constructor(private readonly particle: Particle, private readonly gravityCoef: number) { }
 
   visit(node: QuadTreeInnerNode<Particle, ParticleCollection>): void {
-    if (node.collection.isEmpty()) return
+    if (node.isEmpty) return
     let canApplyAggregate = this.canApplyAggregate(node)
     if (!canApplyAggregate) {
-      for (let child of node.children()) {
+      for (let child of node.children) {
         child.accept(this)
       }
     } else {
@@ -20,10 +20,10 @@ export default class ApplyGravityVisitor implements QuadTreeVisitor<Particle, Pa
   }
 
   visitLeaf(node: QuadTreeLeafNode<Particle, ParticleCollection>): void {
-    this.apply(node.collection)
+    this.apply(node.elements)
   }
 
-  private apply(particles: Iterable<Particle>): void {
+  private apply(particles: Particle[]): void {
     for (let other of particles) {
       if (other == this.particle) continue
       let diff = this.particle.pos.subtract(other.pos);

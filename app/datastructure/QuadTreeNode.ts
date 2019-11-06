@@ -2,32 +2,15 @@ import HasPosition2d from '../state/HasPosition2d'
 import Vector2d from '../state/Vector2d'
 import QuadTreeVisitor from '../state/mutation/QuadTreeVisitor'
 
-export interface ICollection<TElement> extends Iterable<TElement> {
-
-  add(element: TElement): void
-  clear(): void
-  isEmpty(): boolean
-
-  [Symbol.iterator](): Iterator<TElement>
+export interface ICollection<TElement> {
+  elements: TElement[]
 }
 
 export class Collection<TElement> implements ICollection<TElement> {
-  private readonly elements: TElement[]
+  public readonly elements: TElement[]
 
   constructor() {
     this.elements = []
-  }
-  add(element: TElement): void {
-    this.elements.push(element)
-  }
-  clear(): void {
-    this.elements.length = 0
-  }
-  isEmpty(): boolean {
-    return this.elements.length == 0
-  }
-  [Symbol.iterator](): Iterator<TElement> {
-    return this.elements[Symbol.iterator]()
   }
 }
 
@@ -38,6 +21,7 @@ export interface QuadTreeNode<
   origin: Vector2d
   extents: Vector2d
   collection: TCollection
+  isEmpty: boolean
 
   accept(visitor: QuadTreeVisitor<TElement, TCollection>): void
   add(element: TElement): void
@@ -50,21 +34,30 @@ export class QuadTreeLeafNode<
     TCollection extends Collection<TElement>>
   implements QuadTreeNode<TElement, TCollection> {
 
+  public isEmpty: boolean
+  public elements: TElement[]
+
   constructor(
     public readonly origin: Vector2d,
     public readonly extents: Vector2d,
-    public readonly collection: TCollection) { }
+    public readonly collection: TCollection) {
+
+    this.isEmpty = true
+    this.elements = collection.elements // keep direct pointer for perf
+  }
 
   accept(visitor: QuadTreeVisitor<TElement, TCollection>) {
     visitor.visitLeaf(this)
   }
 
   add(element: TElement) {
-    this.collection.add(element)
+    this.isEmpty = false
+    this.elements.push(element)
   }
 
   clear() {
-    this.collection.clear()
+    this.isEmpty = true
+    this.elements.length = 0
   }
 
   contains(element: HasPosition2d): boolean {
@@ -82,6 +75,7 @@ export class QuadTreeInnerNode<
   extends QuadTreeLeafNode<TElement, TCollection> {
 
   private allChildrenEmpty: boolean
+  public readonly children: QuadTreeNode<TElement, TCollection>[]
 
   constructor(
     public readonly origin: Vector2d,
@@ -94,6 +88,7 @@ export class QuadTreeInnerNode<
 
     super(origin, extents, collection)
     this.allChildrenEmpty = true
+    this.children = [upperLeft, upperRight, lowerLeft, lowerRight]
   }
 
   accept(visitor: QuadTreeVisitor<TElement, TCollection>) {
@@ -105,19 +100,20 @@ export class QuadTreeInnerNode<
   }
 
   add(element: TElement) {
-    if (this.collection.isEmpty()) {
-      this.collection.add(element)
+    if (this.isEmpty) {
+      this.isEmpty = false
+      super.add(element)
     }
     else if (this.allChildrenEmpty) {
       this.allChildrenEmpty = false
-      for (let priorElement of this.collection) {
+      for (let priorElement of this.elements) {
         this.add(priorElement)
       }
-      this.collection.clear()
+      this.clear()
       this.add(element)
     }
     else {
-      for (let child of this.children()) {
+      for (let child of this.children) {
         if (child.contains(element)) {
           child.add(element)
           break
@@ -126,19 +122,12 @@ export class QuadTreeInnerNode<
     }
   }
 
-  *children(): Iterable<QuadTreeNode<TElement, TCollection>> {
-    yield this.upperLeft
-    yield this.upperRight
-    yield this.lowerLeft
-    yield this.lowerRight
-  }
-
   clear() {
-    if (!this.collection.isEmpty()) {
+    if (!this.isEmpty) {
       super.clear()
     }
     if (!this.allChildrenEmpty) {
-      for (let child of this.children()) {
+      for (let child of this.children) {
         child.clear()
       }
       this.allChildrenEmpty = true

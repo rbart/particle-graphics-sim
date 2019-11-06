@@ -25,11 +25,12 @@ export default class CanvasRenderer implements Renderer {
   private drawPathLine(particle: Particle): void {
     this.ctx.moveTo(particle.pos.x, particle.pos.y)
     let spdVect = particle.spd;
-    let lastPos: Vector2d = particle.pos.subtract(spdVect)
-    while (spdVect.lengthSquared() < 4) {
-      spdVect = spdVect.multiply(2)
-      lastPos = particle.pos.subtract(spdVect)
+    let lengthSquared = spdVect.lengthSquared()
+    if (lengthSquared < 4) {
+      let shortage = 4 / lengthSquared
+      spdVect = spdVect.multiply(Math.sqrt(shortage))
     }
+    let lastPos: Vector2d = particle.pos.subtract(spdVect)
     this.ctx.lineTo(lastPos.x, lastPos.y)
   }
 }

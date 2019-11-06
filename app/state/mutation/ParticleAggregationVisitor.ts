@@ -8,12 +8,12 @@ import ParticleCollection from "../ParticleCollection"
 export default class ParticleAggregationVisitor implements QuadTreeVisitor<Particle, ParticleCollection> {
 
   visit(node: QuadTreeInnerNode<Particle, ParticleCollection>): void {
-    if (node.collection.isEmpty()) {
+    if (node.isEmpty) {
       return
     }
     let childAggregates: Particle[] = []
-    for (let child of node.children()) {
-      if (!child.collection.isEmpty()) {
+    for (let child of node.children) {
+      if (!child.isEmpty) {
         child.accept(this)
         childAggregates.push(child.collection.aggregate)
       }
@@ -22,11 +22,12 @@ export default class ParticleAggregationVisitor implements QuadTreeVisitor<Parti
   }
 
   visitLeaf(node: QuadTreeLeafNode<Particle, ParticleCollection>): void {
-    if (node.collection.isEmpty()) return
-    node.collection.aggregate = this.aggregate(node.collection)
+    if (node.isEmpty) return
+    node.collection.aggregate = this.aggregate(node.elements)
   }
 
-  private aggregate(particles: Iterable<Particle>): Particle {
+  private aggregate(particles: Particle[]): Particle {
+    if (particles.length == 1) return particles[0]
     let totalMass = 0
     let sumX = 0
     let sumY = 0
