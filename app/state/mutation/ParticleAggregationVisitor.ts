@@ -3,30 +3,30 @@ import Particle from "../Particle"
 import Vector2d from "../Vector2d"
 import Vector3d from "../Vector3d"
 import QuadTreeVisitor from "./QuadTreeVisitor"
+import ParticleCollection from "../ParticleCollection"
 
-export default class ParticleAggregationVisitor implements QuadTreeVisitor<Particle> {
+export default class ParticleAggregationVisitor implements QuadTreeVisitor<Particle, ParticleCollection> {
 
-  visit(node: QuadTreeInnerNode<Particle>): void {
-    if (node.isEmpty) {
+  visit(node: QuadTreeInnerNode<Particle, ParticleCollection>): void {
+    if (node.collection.isEmpty()) {
       return
     }
     let childAggregates: Particle[] = []
     for (let child of node.children()) {
-      if (!child.isEmpty) {
+      if (!child.collection.isEmpty()) {
         child.accept(this)
-        childAggregates.push(child.aggregate!)
+        childAggregates.push(child.collection.aggregate)
       }
     }
-    node.aggregate = this.aggregate(childAggregates)
+    node.collection.aggregate = this.aggregate(childAggregates)
   }
 
-  visitLeaf(node: QuadTreeLeafNode<Particle>): void {
-    if (node.isEmpty) return
-    node.aggregate = this.aggregate(node.elements)
+  visitLeaf(node: QuadTreeLeafNode<Particle, ParticleCollection>): void {
+    if (node.collection.isEmpty()) return
+    node.collection.aggregate = this.aggregate(node.collection)
   }
 
-  private aggregate(particles: Particle[]): Particle {
-    if (particles.length == 1) return particles[0]
+  private aggregate(particles: Iterable<Particle>): Particle {
     let totalMass = 0
     let sumX = 0
     let sumY = 0

@@ -1,5 +1,5 @@
 import ParticleRenderer from './ParticleRenderer'
-import QuadTreeRenderer from './QuadTreeRenderer'
+//import QuadTreeRenderer from './QuadTreeRenderer'
 import FadeRenderer from './FadeRenderer'
 import Renderer from './Renderer'
 import Vector2d from '../state/Vector2d'

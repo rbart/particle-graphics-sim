@@ -1,28 +1,29 @@
 import Particle from "../Particle"
 import QuadTreeVisitor from "./QuadTreeVisitor"
 import { QuadTreeInnerNode, QuadTreeLeafNode, QuadTreeNode } from "../../datastructure/QuadTreeNode"
+import ParticleCollection from "../ParticleCollection"
 
-export default class ApplyGravityVisitor implements QuadTreeVisitor<Particle> {
+export default class ApplyGravityVisitor implements QuadTreeVisitor<Particle, ParticleCollection> {
 
   constructor(private readonly particle: Particle, private readonly gravityCoef: number) { }
 
-  visit(node: QuadTreeInnerNode<Particle>): void {
-    if (node.isEmpty) return
+  visit(node: QuadTreeInnerNode<Particle, ParticleCollection>): void {
+    if (node.collection.isEmpty()) return
     let canApplyAggregate = this.canApplyAggregate(node)
     if (!canApplyAggregate) {
       for (let child of node.children()) {
         child.accept(this)
       }
     } else {
-      this.apply([node.aggregate!])
+      this.apply([node.collection.aggregate])
     }
   }
 
-  visitLeaf(node: QuadTreeLeafNode<Particle>): void {
-    this.apply(node.elements)
+  visitLeaf(node: QuadTreeLeafNode<Particle, ParticleCollection>): void {
+    this.apply(node.collection)
   }
 
-  private apply(particles: Particle[]): void {
+  private apply(particles: Iterable<Particle>): void {
     for (let other of particles) {
       if (other == this.particle) continue
       let diff = this.particle.pos.subtract(other.pos);
@@ -32,7 +33,7 @@ export default class ApplyGravityVisitor implements QuadTreeVisitor<Particle> {
     }
   }
 
-  private canApplyAggregate(node: QuadTreeNode<Particle>): boolean {
+  private canApplyAggregate(node: QuadTreeNode<Particle, ParticleCollection>): boolean {
     let position = this.particle.position()
     let bufferWidth = Math.max(node.extents.x, node.extents.y) / 4
     let contains = position.x >= node.origin.x - bufferWidth &&
