@@ -1,12 +1,12 @@
 import Particle from '../state/Particle'
 import Vector2d from '../state/Vector2d'
 import Renderer from './Renderer'
+import Rectangle from '../state/Rectangle';
 
 export default class CanvasRenderer implements Renderer {
   constructor(
     readonly ctx: CanvasRenderingContext2D,
-    readonly width: number,
-    readonly height: number) { }
+    readonly rectangle: Rectangle) { }
 
   initialize() { }
 

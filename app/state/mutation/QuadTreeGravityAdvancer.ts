@@ -2,10 +2,10 @@ import Advancer from './Advancer'
 import Particle from '../Particle'
 import { QuadTreeNode } from '../../datastructure/QuadTreeNode'
 import QuadTreeBuilder from '../../datastructure/QuadTreeBuilder'
-import Vector2d from '../Vector2d'
 import ParticleAggregationVisitor from './ParticleAggregationVisitor'
 import ApplyGravityVisitor from './ApplyGravityVisitor'
 import ParticleCollection, { ParticleCollectionFactory } from '../ParticleCollection'
+import Rectangle from '../Rectangle'
 
 export default class QuadTreeGravityAdvancer implements Advancer {
 
@@ -16,16 +16,16 @@ export default class QuadTreeGravityAdvancer implements Advancer {
 
   constructor(
       readonly gravityCoef: number,
-      readonly extents: Vector2d,
+      readonly bounds: Rectangle,
       minNodeSizeFactor: number = QuadTreeGravityAdvancer.defaultMinNodeSizeFactor
     ) {
 
-    let minNodeSize = extents.length() * minNodeSizeFactor
+    let minNodeSize = bounds.extents.length() * minNodeSizeFactor
 
     let quadTreeBuilder = new QuadTreeBuilder<Particle, ParticleCollection>(
       new ParticleCollectionFactory(), minNodeSize)
 
-    this.quadTree = quadTreeBuilder.build(extents)
+    this.quadTree = quadTreeBuilder.build(bounds)
     this.particleAggregator = new ParticleAggregationVisitor()
   }
 

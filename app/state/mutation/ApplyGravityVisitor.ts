@@ -9,7 +9,7 @@ export default class ApplyGravityVisitor implements QuadTreeVisitor<Particle, Pa
 
   visit(node: QuadTreeInnerNode<Particle, ParticleCollection>): void {
     if (node.isEmpty) return
-    let canApplyAggregate = node.collection.canApplyAggregate(this.particle)
+    let canApplyAggregate = !node.collection.paddedBounds.contains(this.particle)
     if (!canApplyAggregate) {
       for (let child of node.children) {
         child.accept(this)
