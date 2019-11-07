@@ -1,6 +1,6 @@
 import Particle from "../Particle"
-import QuadTreeVisitor from "./QuadTreeVisitor"
-import { QuadTreeInnerNode, QuadTreeLeafNode, QuadTreeNode } from "../../datastructure/QuadTreeNode"
+import QuadTreeVisitor from "../../datastructure/QuadTreeVisitor"
+import { QuadTreeInnerNode, QuadTreeLeafNode } from "../../datastructure/QuadTreeNode"
 import ParticleCollection from "../ParticleCollection"
 
 export default class ApplyGravityVisitor implements QuadTreeVisitor<Particle, ParticleCollection> {
@@ -9,7 +9,7 @@ export default class ApplyGravityVisitor implements QuadTreeVisitor<Particle, Pa
 
   visit(node: QuadTreeInnerNode<Particle, ParticleCollection>): void {
     if (node.isEmpty) return
-    let canApplyAggregate = this.canApplyAggregate(node)
+    let canApplyAggregate = node.collection.canApplyAggregate(this.particle)
     if (!canApplyAggregate) {
       for (let child of node.children) {
         child.accept(this)
@@ -31,15 +31,5 @@ export default class ApplyGravityVisitor implements QuadTreeVisitor<Particle, Pa
       let gravityVector = diff.multiply(gravityStrength);
       this.particle.spd.subtractMutate(gravityVector)
     }
-  }
-
-  private canApplyAggregate(node: QuadTreeNode<Particle, ParticleCollection>): boolean {
-    let position = this.particle.position()
-    let bufferWidth = Math.max(node.extents.x, node.extents.y) / 4
-    let contains = position.x >= node.origin.x - bufferWidth &&
-      position.x < node.origin.x + node.extents.x + bufferWidth &&
-      position.y >= node.origin.y - bufferWidth &&
-      position.y < node.origin.y + node.extents.y + bufferWidth
-    return !contains
   }
 }

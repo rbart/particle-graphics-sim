@@ -1,6 +1,6 @@
 import HasPosition2d from '../state/HasPosition2d'
 import Vector2d from '../state/Vector2d'
-import QuadTreeVisitor from '../state/mutation/QuadTreeVisitor'
+import QuadTreeVisitor from './QuadTreeVisitor'
 
 export interface ICollection<TElement> {
   elements: TElement[]

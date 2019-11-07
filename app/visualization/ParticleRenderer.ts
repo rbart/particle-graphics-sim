@@ -23,6 +23,7 @@ export default class CanvasRenderer implements Renderer {
   }
 
   private drawPathLine(particle: Particle): void {
+    // TODO: particles could remember their own lastpos.
     this.ctx.moveTo(particle.pos.x, particle.pos.y)
     let spdVect = particle.spd;
     let lengthSquared = spdVect.lengthSquared()

@@ -1,6 +1,6 @@
 import { QuadTreeInnerNode, QuadTreeLeafNode, QuadTreeNode } from "../../datastructure/QuadTreeNode"
 import Particle from "../Particle"
-import QuadTreeVisitor from "./QuadTreeVisitor"
+import QuadTreeVisitor from "../../datastructure/QuadTreeVisitor"
 import ParticleCollection from "../ParticleCollection"
 
 export default class ParticleAggregationVisitor implements QuadTreeVisitor<Particle, ParticleCollection> {
@@ -25,21 +25,28 @@ export default class ParticleAggregationVisitor implements QuadTreeVisitor<Parti
   }
 
   private aggregate(particles: Particle[], node: QuadTreeNode<Particle, ParticleCollection>): void {
-    //if (particles.length == 1) return particles[0]
-    let totalMass = 0
-    let sumX = 0
-    let sumY = 0
-    for (let particle of particles) {
-      totalMass += particle.mass
-      sumX += particle.pos.x * particle.mass
-      sumY += particle.pos.y * particle.mass
-    }
-    let avgX = totalMass == 0 ? 0 : sumX / totalMass
-    let avgY = totalMass == 0 ? 0 : sumY / totalMass
-
     let aggregate = node.collection.aggregate
-    aggregate.pos.x = avgX
-    aggregate.pos.y = avgY
-    aggregate.mass = totalMass
+    if (particles.length == 1) {
+      let particle = particles[0]
+      aggregate.pos.x = particle.pos.x
+      aggregate.pos.y = particle.pos.y
+      aggregate.mass = particle.mass
+    }
+    else {
+      let totalMass = 0
+      let sumX = 0
+      let sumY = 0
+      for (let particle of particles) {
+        totalMass += particle.mass
+        sumX += particle.pos.x * particle.mass
+        sumY += particle.pos.y * particle.mass
+      }
+      let avgX = totalMass == 0 ? 0 : sumX / totalMass
+      let avgY = totalMass == 0 ? 0 : sumY / totalMass
+
+      aggregate.pos.x = avgX
+      aggregate.pos.y = avgY
+      aggregate.mass = totalMass
+    }
   }
 }

@@ -2,18 +2,16 @@ import HasPosition2d from '../state/HasPosition2d'
 import Vector2d from '../state/Vector2d'
 import { QuadTreeNode, QuadTreeLeafNode, QuadTreeInnerNode } from './QuadTreeNode'
 import { Collection } from './QuadTreeNode'
-
-export interface Factory<T> {
-  createInstance(): T
-}
+import QuadTreeCollectionFactory from './QuadTreeCollectionFactory'
 
 export default class QuadTreeBuilder<
     TElement extends HasPosition2d,
     TCollection extends Collection<TElement>> {
 
-  constructor(private collectionFactory: Factory<TCollection>, private minNodeSize: number) { }
+  constructor(
+    private collectionFactory: QuadTreeCollectionFactory<TCollection>,
+    private minNodeSize: number) { }
 
-  // TODO just pass a rectangle
   build(extents: Vector2d): QuadTreeNode<TElement, TCollection> {
     return this.buildImpl(new Vector2d(0,0), extents)
   }
@@ -29,7 +27,7 @@ export default class QuadTreeBuilder<
       return new QuadTreeInnerNode<TElement, TCollection>(
         origin,
         extents,
-        this.collectionFactory.createInstance(),
+        this.collectionFactory.createInstance(origin, extents),
         upperLeft,
         upperRight,
         lowerLeft,
@@ -37,7 +35,7 @@ export default class QuadTreeBuilder<
 
     } else {
       return new QuadTreeLeafNode<TElement, TCollection>(
-        origin, extents, this.collectionFactory.createInstance())
+        origin, extents, this.collectionFactory.createInstance(origin, extents))
     }
   }
 }

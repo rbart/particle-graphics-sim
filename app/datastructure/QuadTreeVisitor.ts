@@ -1,5 +1,5 @@
-import { QuadTreeLeafNode, QuadTreeInnerNode, Collection } from '../../datastructure/QuadTreeNode'
-import HasPosition2d from '../HasPosition2d'
+import { QuadTreeLeafNode, QuadTreeInnerNode, Collection } from './QuadTreeNode'
+import HasPosition2d from '../state/HasPosition2d'
 
 export default interface Visitor<TElement extends HasPosition2d, TCollection extends Collection<TElement>> {
   visit(node: QuadTreeInnerNode<TElement, TCollection>): void,
