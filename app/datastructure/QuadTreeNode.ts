@@ -1,32 +1,19 @@
 import HasPosition2d from '../state/HasPosition2d'
-import Vector2d from '../state/Vector2d'
 import QuadTreeVisitor from './QuadTreeVisitor'
-
-export interface ICollection<TElement> {
-  elements: TElement[]
-}
-
-export class Collection<TElement> implements ICollection<TElement> {
-  public readonly elements: TElement[]
-
-  constructor() {
-    this.elements = []
-  }
-}
+import Rectangle from '../state/Rectangle'
+import Collection from './Collection'
 
 export interface QuadTreeNode<
     TElement extends HasPosition2d,
     TCollection extends Collection<TElement>> {
 
-  origin: Vector2d
-  extents: Vector2d
+  bounds: Rectangle
   collection: TCollection
   isEmpty: boolean
 
   accept(visitor: QuadTreeVisitor<TElement, TCollection>): void
   add(element: TElement): void
   clear(): void
-  contains(element: HasPosition2d): boolean,
 }
 
 export class QuadTreeLeafNode<
@@ -38,8 +25,7 @@ export class QuadTreeLeafNode<
   public elements: TElement[]
 
   constructor(
-    public readonly origin: Vector2d,
-    public readonly extents: Vector2d,
+    public readonly bounds: Rectangle,
     public readonly collection: TCollection) {
 
     this.isEmpty = true
@@ -59,14 +45,6 @@ export class QuadTreeLeafNode<
     this.isEmpty = true
     this.elements.length = 0
   }
-
-  contains(element: HasPosition2d): boolean {
-    let position = element.position()
-    return position.x >= this.origin.x &&
-      position.x < this.origin.x + this.extents.x &&
-      position.y >= this.origin.y &&
-      position.y < this.origin.y + this.extents.y;
-  }
 }
 
 export class QuadTreeInnerNode<
@@ -78,15 +56,14 @@ export class QuadTreeInnerNode<
   public readonly children: QuadTreeNode<TElement, TCollection>[]
 
   constructor(
-    public readonly origin: Vector2d,
-    public readonly extents: Vector2d,
+    public readonly bounds: Rectangle,
     public readonly collection: TCollection,
     public readonly upperLeft: QuadTreeNode<TElement, TCollection>,
     public readonly upperRight: QuadTreeNode<TElement, TCollection>,
     public readonly lowerLeft: QuadTreeNode<TElement, TCollection>,
     public readonly lowerRight: QuadTreeNode<TElement, TCollection>) {
 
-    super(origin, extents, collection)
+    super(bounds, collection)
     this.allChildrenEmpty = true
     this.children = [upperLeft, upperRight, lowerLeft, lowerRight]
   }
@@ -114,7 +91,7 @@ export class QuadTreeInnerNode<
     }
     else {
       for (let child of this.children) {
-        if (child.contains(element)) {
+        if (child.bounds.contains(element)) {
           child.add(element)
           break
         }
