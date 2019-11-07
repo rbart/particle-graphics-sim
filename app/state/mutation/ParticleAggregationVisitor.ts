@@ -1,43 +1,52 @@
-import { QuadTreeInnerNode, QuadTreeLeafNode } from "../../datastructure/QuadTreeNode"
+import { QuadTreeInnerNode, QuadTreeLeafNode, QuadTreeNode } from "../../datastructure/QuadTreeNode"
 import Particle from "../Particle"
-import Vector2d from "../Vector2d"
-import Vector3d from "../Vector3d"
-import QuadTreeVisitor from "./QuadTreeVisitor"
+import QuadTreeVisitor from "../../datastructure/QuadTreeVisitor"
+import ParticleCollection from "../ParticleCollection"
 
-export default class ParticleAggregationVisitor implements QuadTreeVisitor<Particle> {
+export default class ParticleAggregationVisitor implements QuadTreeVisitor<Particle, ParticleCollection> {
 
-  visit(node: QuadTreeInnerNode<Particle>): void {
+  visit(node: QuadTreeInnerNode<Particle, ParticleCollection>): void {
     if (node.isEmpty) {
       return
     }
     let childAggregates: Particle[] = []
-    for (let child of node.children()) {
+    for (let child of node.children) {
       if (!child.isEmpty) {
         child.accept(this)
-        childAggregates.push(child.aggregate!)
+        childAggregates.push(child.collection.aggregate)
       }
     }
-    node.aggregate = this.aggregate(childAggregates)
+    this.aggregate(childAggregates, node)
   }
 
-  visitLeaf(node: QuadTreeLeafNode<Particle>): void {
+  visitLeaf(node: QuadTreeLeafNode<Particle, ParticleCollection>): void {
     if (node.isEmpty) return
-    node.aggregate = this.aggregate(node.elements)
+    this.aggregate(node.elements, node)
   }
 
-  private aggregate(particles: Particle[]): Particle {
-    if (particles.length == 1) return particles[0]
-    let totalMass = 0
-    let sumX = 0
-    let sumY = 0
-    for (let particle of particles) {
-      totalMass += particle.mass
-      sumX += particle.pos.x * particle.mass
-      sumY += particle.pos.y * particle.mass
+  private aggregate(particles: Particle[], node: QuadTreeNode<Particle, ParticleCollection>): void {
+    let aggregate = node.collection.aggregate
+    if (particles.length == 1) {
+      let particle = particles[0]
+      aggregate.pos.x = particle.pos.x
+      aggregate.pos.y = particle.pos.y
+      aggregate.mass = particle.mass
     }
-    let avgX = totalMass == 0 ? 0 : sumX / totalMass
-    let avgY = totalMass == 0 ? 0 : sumY / totalMass
-    // TODO aggregate all the fields properly
-    return new Particle(new Vector2d(avgX, avgY), new Vector2d(0, 0), totalMass, totalMass, new Vector3d(0, 0, 0))
+    else {
+      let totalMass = 0
+      let sumX = 0
+      let sumY = 0
+      for (let particle of particles) {
+        totalMass += particle.mass
+        sumX += particle.pos.x * particle.mass
+        sumY += particle.pos.y * particle.mass
+      }
+      let avgX = totalMass == 0 ? 0 : sumX / totalMass
+      let avgY = totalMass == 0 ? 0 : sumY / totalMass
+
+      aggregate.pos.x = avgX
+      aggregate.pos.y = avgY
+      aggregate.mass = totalMass
+    }
   }
 }

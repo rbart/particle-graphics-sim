@@ -3,11 +3,12 @@ import Vector2d from '../state/Vector2d'
 import Renderer from './Renderer'
 import QuadTreeBuilder  from '../datastructure/QuadTreeBuilder'
 import { QuadTreeNode, QuadTreeInnerNode, QuadTreeLeafNode } from '../datastructure/QuadTreeNode'
-import QuadTreeVisitor from '../state/mutation/QuadTreeVisitor'
+import QuadTreeVisitor from '../datastructure/QuadTreeVisitor'
+import ParticleCollection, { ParticleCollectionFactory } from '../state/ParticleCollection'
 
 export default class QuadTreeRenderer implements Renderer {
 
-  private quadTree: QuadTreeNode<Particle>
+  private quadTree: QuadTreeNode<Particle, ParticleCollection>
 
   constructor(
     readonly ctx: CanvasRenderingContext2D,
@@ -15,10 +16,10 @@ export default class QuadTreeRenderer implements Renderer {
     // TODO: don't create the quadtree at all here. We should reuse a single quadTree
     // throughout
     let minNodeSize = extents.length() / 80
-    let quadTreeBuilder = new QuadTreeBuilder<Particle>(minNodeSize)
+    let quadTreeBuilder = new QuadTreeBuilder<Particle, ParticleCollection>(
+      new ParticleCollectionFactory(), minNodeSize)
     this.quadTree = quadTreeBuilder.build(extents)
   }
-
 
   initialize() { }
 
@@ -45,22 +46,26 @@ export default class QuadTreeRenderer implements Renderer {
   }
 }
 
-class RenderingVisitor implements QuadTreeVisitor<Particle> {
+class RenderingVisitor implements QuadTreeVisitor<Particle, ParticleCollection> {
 
   constructor(readonly ctx: CanvasRenderingContext2D) {}
 
-  visit(node: QuadTreeInnerNode<Particle>): void {
+  visit(node: QuadTreeInnerNode<Particle, ParticleCollection>): void {
     if (!node.isEmpty) {
-      this.ctx.rect(node.origin.x, node.origin.y, node.extents.x, node.extents.y);
-      for (let child of node.children()) {
+      this.drawRect(node)
+      for (let child of node.children) {
         child.accept(this)
       }
     }
   }
 
-  visitLeaf(node: QuadTreeLeafNode<Particle>): void {
+  visitLeaf(node: QuadTreeLeafNode<Particle, ParticleCollection>): void {
     if (!node.isEmpty) {
-      this.ctx.rect(node.origin.x, node.origin.y, node.extents.x, node.extents.y);
+      this.drawRect(node)
     }
+  }
+
+  private drawRect(node: QuadTreeNode<Particle, ParticleCollection>): void {
+    this.ctx.rect(node.origin.x, node.origin.y, node.extents.x, node.extents.y);
   }
 }

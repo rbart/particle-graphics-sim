@@ -1,29 +1,52 @@
 import HasPosition2d from '../state/HasPosition2d'
 import Vector2d from '../state/Vector2d'
-import QuadTreeVisitor from '../state/mutation/QuadTreeVisitor'
+import QuadTreeVisitor from './QuadTreeVisitor'
 
-export interface QuadTreeNode<TElement extends HasPosition2d> {
+export interface ICollection<TElement> {
+  elements: TElement[]
+}
+
+export class Collection<TElement> implements ICollection<TElement> {
+  public readonly elements: TElement[]
+
+  constructor() {
+    this.elements = []
+  }
+}
+
+export interface QuadTreeNode<
+    TElement extends HasPosition2d,
+    TCollection extends Collection<TElement>> {
+
   origin: Vector2d
   extents: Vector2d
+  collection: TCollection
   isEmpty: boolean
-  elements: TElement[]
-  aggregate: TElement | null
-  accept(visitor: QuadTreeVisitor<TElement>): void
+
+  accept(visitor: QuadTreeVisitor<TElement, TCollection>): void
   add(element: TElement): void
   clear(): void
   contains(element: HasPosition2d): boolean,
 }
 
-export class QuadTreeLeafNode<TElement extends HasPosition2d> implements QuadTreeNode<TElement> {
-  public elements: TElement[] = []
-  public aggregate: TElement | null = null
-  public isEmpty: boolean = true
+export class QuadTreeLeafNode<
+    TElement extends HasPosition2d,
+    TCollection extends Collection<TElement>>
+  implements QuadTreeNode<TElement, TCollection> {
+
+  public isEmpty: boolean
+  public elements: TElement[]
 
   constructor(
     public readonly origin: Vector2d,
-    public readonly extents: Vector2d) { }
+    public readonly extents: Vector2d,
+    public readonly collection: TCollection) {
 
-  accept(visitor: QuadTreeVisitor<TElement>) {
+    this.isEmpty = true
+    this.elements = collection.elements // keep direct pointer for perf
+  }
+
+  accept(visitor: QuadTreeVisitor<TElement, TCollection>) {
     visitor.visitLeaf(this)
   }
 
@@ -33,9 +56,8 @@ export class QuadTreeLeafNode<TElement extends HasPosition2d> implements QuadTre
   }
 
   clear() {
-    this.elements.length = 0
-    this.aggregate = null
     this.isEmpty = true
+    this.elements.length = 0
   }
 
   contains(element: HasPosition2d): boolean {
@@ -47,24 +69,29 @@ export class QuadTreeLeafNode<TElement extends HasPosition2d> implements QuadTre
   }
 }
 
-export class QuadTreeInnerNode<TElement extends HasPosition2d>
-  extends QuadTreeLeafNode<TElement> implements QuadTreeNode<TElement> {
+export class QuadTreeInnerNode<
+    TElement extends HasPosition2d,
+    TCollection extends Collection<TElement>>
+  extends QuadTreeLeafNode<TElement, TCollection> {
 
   private allChildrenEmpty: boolean
+  public readonly children: QuadTreeNode<TElement, TCollection>[]
 
   constructor(
     public readonly origin: Vector2d,
     public readonly extents: Vector2d,
-    public readonly upperLeft: QuadTreeNode<TElement>,
-    public readonly upperRight: QuadTreeNode<TElement>,
-    public readonly lowerLeft: QuadTreeNode<TElement>,
-    public readonly lowerRight: QuadTreeNode<TElement>) {
+    public readonly collection: TCollection,
+    public readonly upperLeft: QuadTreeNode<TElement, TCollection>,
+    public readonly upperRight: QuadTreeNode<TElement, TCollection>,
+    public readonly lowerLeft: QuadTreeNode<TElement, TCollection>,
+    public readonly lowerRight: QuadTreeNode<TElement, TCollection>) {
 
-    super(origin, extents)
+    super(origin, extents, collection)
     this.allChildrenEmpty = true
+    this.children = [upperLeft, upperRight, lowerLeft, lowerRight]
   }
 
-  accept(visitor: QuadTreeVisitor<TElement>) {
+  accept(visitor: QuadTreeVisitor<TElement, TCollection>) {
     if (this.allChildrenEmpty) {
       visitor.visitLeaf(this)
     } else {
@@ -86,7 +113,7 @@ export class QuadTreeInnerNode<TElement extends HasPosition2d>
       this.add(element)
     }
     else {
-      for (let child of this.children()) {
+      for (let child of this.children) {
         if (child.contains(element)) {
           child.add(element)
           break
@@ -95,19 +122,12 @@ export class QuadTreeInnerNode<TElement extends HasPosition2d>
     }
   }
 
-  *children(): Iterable<QuadTreeNode<TElement>> {
-    yield this.upperLeft
-    yield this.upperRight
-    yield this.lowerLeft
-    yield this.lowerRight
-  }
-
   clear() {
     if (!this.isEmpty) {
       super.clear()
     }
     if (!this.allChildrenEmpty) {
-      for (let child of this.children()) {
+      for (let child of this.children) {
         child.clear()
       }
       this.allChildrenEmpty = true
