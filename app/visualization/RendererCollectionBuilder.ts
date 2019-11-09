@@ -14,8 +14,7 @@ export default class RendererCollectionBuilder {
 
     return new RendererCollection([
       new FadeRenderer(ctx, bounds, fadeRate),
-      new ParticleRenderer(ctx, bounds),
-      new QuadTreeRenderer(ctx, bounds)
+      new ParticleRenderer(ctx, bounds)
     ])
   }
 }

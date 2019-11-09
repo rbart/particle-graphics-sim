@@ -5,7 +5,7 @@ import ParticleCollection from "../ParticleCollection"
 
 export default class ApplyGravityVisitor implements QuadTreeVisitor<Particle, ParticleCollection> {
 
-  constructor(private readonly particle: Particle, private readonly gravityCoef: number) { }
+  constructor(protected readonly particle: Particle, protected readonly gravityCoef: number) { }
 
   visit(node: QuadTreeInnerNode<Particle, ParticleCollection>): void {
     if (node.isEmpty) return
@@ -23,7 +23,7 @@ export default class ApplyGravityVisitor implements QuadTreeVisitor<Particle, Pa
     this.apply(node.elements)
   }
 
-  private apply(particles: Particle[]): void {
+  protected apply(particles: Particle[]): void {
     for (let other of particles) {
       if (other == this.particle) continue
       let diff = this.particle.pos.subtract(other.pos);

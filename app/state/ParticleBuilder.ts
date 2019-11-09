@@ -1,5 +1,4 @@
 import Vector2d from './Vector2d'
-import Vector3d from './Vector3d'
 import Particle from './Particle'
 
 export default class ParticleBuilder {
@@ -19,14 +18,17 @@ export default class ParticleBuilder {
       Math.random() * maxSpeed * 2 - maxSpeed,
     );
     return new Particle(
-      randomPosition, randomSpeed, radius, radius, this.getRndColor()
+      randomPosition, randomSpeed, radius, radius, this.getRndHue()
     );
   }
 
-  private getRndColor() {
+  private getRndHue(): Vector2d {
 
-    let hue = (360 * Math.random() | 0)
+    let hueAngle = 360 * Math.random()
 
-    return new Vector3d(hue, 100, 50);
+    let hueX = Math.cos(hueAngle)
+    let hueY = Math.sin(hueAngle)
+
+    return new Vector2d(hueX, hueY);
   }
 }

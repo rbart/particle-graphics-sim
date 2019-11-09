@@ -9,6 +9,10 @@ export default class Vector3d {
     }
 
     multiply(scalar: number): Vector3d {
-      return new Vector3d(this.x * scalar, this.y * scalar, this.z * scalar);
+      return new Vector3d(this.x * scalar, this.y * scalar, this.z * scalar)
+    }
+
+    dotProduct(other: Vector3d): number {
+      return this.x * other.x + this.y * other.y + this.z * other.z
     }
 }

@@ -26,7 +26,7 @@ export default class ParticleCollection extends Collection<Particle> {
 
   constructor(bounds: Rectangle, bufferWidthConstant: number) {
     super();
-    this.aggregate = new Particle(new Vector2d(0,0), new Vector2d(0,0), 0, 0, new Vector3d(0,0,0))
+    this.aggregate = new Particle(new Vector2d(0,0), new Vector2d(0,0), 0, 0, new Vector2d(0,0))
     let bufferWidth = bounds.extents.length() * bufferWidthConstant
     let paddedOrigin = new Vector2d(bounds.origin.x - bufferWidth, bounds.origin.y - bufferWidth)
     let paddedExtents = new Vector2d(bounds.extents.x + 2*bufferWidth, bounds.extents.y + 2*bufferWidth)
