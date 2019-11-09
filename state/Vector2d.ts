@@ -44,6 +44,16 @@ export default class Vector2d implements HasPosition2d {
       return new Vector2d(this.x * scalar, this.y * scalar);
     }
 
+    multiplyMutate(scalar: number) {
+      this.x *= scalar
+      this.y *= scalar
+    }
+
+    divideMutate(scalar: number) {
+      this.x /= scalar
+      this.y /= scalar
+    }
+
     lengthSquared(): number {
       return this.x * this.x + this.y * this.y
     }
@@ -54,5 +64,18 @@ export default class Vector2d implements HasPosition2d {
 
     toString(): string {
       return `Vector2d: {x: ${this.x}, y: ${this.y}}`
+    }
+
+    dotProduct(other: Vector2d): number {
+      return this.x * other.x + this.y * other.y
+    }
+
+    cosineSimilarity(other: Vector2d): number {
+      return this.dotProduct(other) / (this.length() * other.length())
+    }
+
+    setEqualTo(other: Vector2d) {
+      this.x = other.x
+      this.y = other.y
     }
 }

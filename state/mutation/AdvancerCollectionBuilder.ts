@@ -1,20 +1,20 @@
 import Advancer from "./Advancer"
 import BasicAdvancer from './BasicAdvancer'
 import WallBounceAdvancer from './WallBounceAdvancer'
-import GravityAdvancer from './GravityAdvancer'
-import Vector2d from '../Vector2d'
 import QuadTreeGravityAdvancer from './QuadTreeGravityAdvancer'
 import AdvancerCollection from './AdvancerCollection'
+import Rectangle from "../Rectangle"
+import FixedGravityAdvancer from "./FixedGravityAdvancer"
 
 export default class AdvancerCollectionBuilder {
 
-  static createDefault(width: number, height: number): Advancer {
+  static createDefault(bounds: Rectangle): Advancer {
 
     let advancers: Advancer[] = [
-      new WallBounceAdvancer(0.5, width, height),
-      new QuadTreeGravityAdvancer(0.03, new Vector2d(width, height)),
-      //new GravityAdvancer(0.06),
-      new BasicAdvancer()
+      new WallBounceAdvancer(0.99, bounds),
+      new QuadTreeGravityAdvancer(0.06, bounds),
+      new BasicAdvancer(),
+      //new FixedGravityAdvancer(bounds.extents.multiply(0.5), 100, 0.04)
     ];
 
     return new AdvancerCollection(advancers)

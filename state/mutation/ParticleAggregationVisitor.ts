@@ -2,6 +2,7 @@ import { QuadTreeInnerNode, QuadTreeLeafNode, QuadTreeNode } from "../../datastr
 import Particle from "../Particle"
 import QuadTreeVisitor from "../../datastructure/QuadTreeVisitor"
 import ParticleCollection from "../ParticleCollection"
+import Vector2d from "../Vector2d"
 
 export default class ParticleAggregationVisitor implements QuadTreeVisitor<Particle, ParticleCollection> {
 
@@ -28,24 +29,23 @@ export default class ParticleAggregationVisitor implements QuadTreeVisitor<Parti
     let aggregate = node.collection.aggregate
     if (particles.length == 1) {
       let particle = particles[0]
-      aggregate.pos.x = particle.pos.x
-      aggregate.pos.y = particle.pos.y
+      aggregate.pos.setEqualTo(particle.pos)
+      aggregate.hue.setEqualTo(particle.hue)
       aggregate.mass = particle.mass
     }
     else {
       let totalMass = 0
-      let sumX = 0
-      let sumY = 0
+      let avgPos = new Vector2d(0,0)
+      let avgHue = new Vector2d(0,0)
       for (let particle of particles) {
         totalMass += particle.mass
-        sumX += particle.pos.x * particle.mass
-        sumY += particle.pos.y * particle.mass
+        avgPos.addMutate(particle.pos.multiply(particle.mass))
+        avgHue.addMutate(particle.hue.multiply(particle.mass))
       }
-      let avgX = totalMass == 0 ? 0 : sumX / totalMass
-      let avgY = totalMass == 0 ? 0 : sumY / totalMass
-
-      aggregate.pos.x = avgX
-      aggregate.pos.y = avgY
+      avgPos.divideMutate(totalMass)
+      avgHue.divideMutate(avgHue.length())
+      aggregate.pos.setEqualTo(avgPos)
+      aggregate.hue.setEqualTo(avgHue)
       aggregate.mass = totalMass
     }
   }

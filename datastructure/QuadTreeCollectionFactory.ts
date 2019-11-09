@@ -1,5 +1,5 @@
-import Vector2d from "../state/Vector2d";
+import Rectangle from "../state/Rectangle";
 
 export default interface QuadTreeCollectionFactory<TCollection> {
-  createInstance(origin: Vector2d, extents: Vector2d): TCollection
+  createInstance(bounds: Rectangle): TCollection
 }

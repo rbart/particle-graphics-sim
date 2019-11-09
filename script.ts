@@ -4,6 +4,8 @@ import Advancer from "./state/mutation/Advancer"
 import AdvancerBuilder from "./state/mutation/AdvancerCollectionBuilder"
 import Renderer from "./visualization/Renderer"
 import RendererCollectionBuilder from "./visualization/RendererCollectionBuilder"
+import Vector2d from "./state/Vector2d";
+import Rectangle from "./state/Rectangle";
 
 var c = <HTMLCanvasElement>document.getElementById("canvas");
 c.width  = window.innerWidth;
@@ -26,16 +28,18 @@ let particles: Particle[] = []
 
 let particleBuilder = new ParticleBuilder(c.width, c.height);
 
-for (var i = 0; i < 2500; i++) {
-  let particle: Particle = particleBuilder.generateRandomParticle(0.5, 1, 1);
+for (var i = 0; i < 2000; i++) {
+  let particle: Particle = particleBuilder.generateRandomParticle(0.3, 1.5, 1.5);
   particles.push(particle);
 }
 
-let renderer: Renderer = RendererCollectionBuilder.createDefault(ctx, c.width, c.height, 0.7);
+let bounds: Rectangle = new Rectangle(new Vector2d(0,0), new Vector2d(c.width, c.height))
+
+let renderer: Renderer = RendererCollectionBuilder.createDefault(ctx, bounds, 0.7);
 
 renderer.initialize();
 
-let advancer: Advancer = AdvancerBuilder.createDefault(c.width, c.height);
+let advancer: Advancer = AdvancerBuilder.createDefault(bounds);
 
 function frame() {
   advancer.advance(particles);

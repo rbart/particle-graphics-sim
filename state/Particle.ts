@@ -8,7 +8,7 @@ export default class Particle implements HasPosition2d {
     readonly spd: Vector2d,
     public mass: number,
     readonly rad: number,
-    readonly color: Vector3d) { }
+    readonly hue: Vector2d) { }
 
   position(): Vector2d {
     return this.pos;
@@ -17,7 +17,8 @@ export default class Particle implements HasPosition2d {
   private hslColorString_memo: string | null = null
   hslColorString(): string {
     if (this.hslColorString_memo == null) {
-      this.hslColorString_memo = `hsl(${this.color.x | 0},${this.color.y | 0}%,${this.color.z | 0}%)`
+      let colorAngle: number = Math.atan2(this.hue.y, this.hue.x) * (180 / Math.PI)
+      this.hslColorString_memo = `hsl(${colorAngle| 0},100%,50%)`
     }
     return this.hslColorString_memo!
   }

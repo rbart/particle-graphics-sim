@@ -1,10 +1,10 @@
 import Particle from '../state/Particle'
-import Vector2d from '../state/Vector2d'
 import Renderer from './Renderer'
 import QuadTreeBuilder  from '../datastructure/QuadTreeBuilder'
 import { QuadTreeNode, QuadTreeInnerNode, QuadTreeLeafNode } from '../datastructure/QuadTreeNode'
 import QuadTreeVisitor from '../datastructure/QuadTreeVisitor'
 import ParticleCollection, { ParticleCollectionFactory } from '../state/ParticleCollection'
+import Rectangle from '../state/Rectangle'
 
 export default class QuadTreeRenderer implements Renderer {
 
@@ -12,13 +12,13 @@ export default class QuadTreeRenderer implements Renderer {
 
   constructor(
     readonly ctx: CanvasRenderingContext2D,
-    readonly extents: Vector2d)  {
+    readonly bounds: Rectangle)  {
     // TODO: don't create the quadtree at all here. We should reuse a single quadTree
     // throughout
-    let minNodeSize = extents.length() / 80
+    let minNodeSize = bounds.extents.length() / 80
     let quadTreeBuilder = new QuadTreeBuilder<Particle, ParticleCollection>(
       new ParticleCollectionFactory(), minNodeSize)
-    this.quadTree = quadTreeBuilder.build(extents)
+    this.quadTree = quadTreeBuilder.build(bounds)
   }
 
   initialize() { }
@@ -52,7 +52,7 @@ class RenderingVisitor implements QuadTreeVisitor<Particle, ParticleCollection> 
 
   visit(node: QuadTreeInnerNode<Particle, ParticleCollection>): void {
     if (!node.isEmpty) {
-      this.drawRect(node)
+      this.drawRect(node.bounds)
       for (let child of node.children) {
         child.accept(this)
       }
@@ -61,11 +61,11 @@ class RenderingVisitor implements QuadTreeVisitor<Particle, ParticleCollection> 
 
   visitLeaf(node: QuadTreeLeafNode<Particle, ParticleCollection>): void {
     if (!node.isEmpty) {
-      this.drawRect(node)
+      this.drawRect(node.bounds)
     }
   }
 
-  private drawRect(node: QuadTreeNode<Particle, ParticleCollection>): void {
-    this.ctx.rect(node.origin.x, node.origin.y, node.extents.x, node.extents.y);
+  private drawRect(rectangle: Rectangle): void {
+    this.ctx.rect(rectangle.origin.x, rectangle.origin.y, rectangle.extents.x, rectangle.extents.y);
   }
 }
