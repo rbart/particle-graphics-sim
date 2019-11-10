@@ -262,7 +262,7 @@ c.addEventListener("click", fullscreen);
 let ctx = c.getContext("2d");
 let particles = [];
 let particleBuilder = new ParticleBuilder_1.default(c.width, c.height);
-for (var i = 0; i < 2000; i++) {
+for (var i = 0; i < 4000; i++) {
     let particle = particleBuilder.generateRandomParticle(0.3, 1.5, 1.5);
     particles.push(particle);
 }
@@ -568,6 +568,9 @@ class ApplyColorGravityVisitor extends ApplyGravityVisitor_1.default {
         this.particle = particle;
         this.gravityCoef = gravityCoef;
         this.frameNumber = frameNumber;
+        this.colorFactorCosine = Math.cos(this.frameNumber / 151);
+        this.gravityPushPullCosine = Math.cos(this.frameNumber / 237);
+        this.gravityPushPullCosine = -0.2 / (1.1 + this.gravityPushPullCosine) + 1;
     }
     apply(particles) {
         for (let other of particles) {
@@ -575,15 +578,8 @@ class ApplyColorGravityVisitor extends ApplyGravityVisitor_1.default {
                 continue;
             let diff = this.particle.pos.subtract(other.pos);
             let colorCosine = this.particle.hue.cosineSimilarity(other.hue);
-            let colorFactorCosine = Math.cos(this.frameNumber / 151);
-            // this controls how much color controls gravity
-            colorCosine = (colorFactorCosine + (1 - colorFactorCosine) * colorCosine);
-            // this controls how often everything switches to negative
-            let gravityPushPullCosine = Math.cos(this.frameNumber / 237);
-            colorCosine *= -0.2 / (1.1 + gravityPushPullCosine) + 1;
-            //let frameCosine = Math.cos(this.frameNumber / 300)
-            //let frameCosine2 = Math.cos(this.frameNumber / 600)
-            //colorCosine = frameCosine2 * (frameCosine + (1-frameCosine)*colorCosine)
+            colorCosine = (this.colorFactorCosine + (1 - this.colorFactorCosine) * colorCosine);
+            colorCosine *= this.gravityPushPullCosine;
             let gravityStrength = (colorCosine * other.mass * this.gravityCoef) / diff.lengthSquared();
             let gravityVector = diff.multiply(gravityStrength);
             if (gravityVector.length() > 20)
@@ -657,7 +653,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 class BasicAdvancer {
     advance(particles) {
         for (let particle of particles) {
-            particle.spd.multiplyMutate(0.994);
+            particle.spd.multiplyMutate(0.995);
             particle.pos.addMutate(particle.spd);
         }
     }
