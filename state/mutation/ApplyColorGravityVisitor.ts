@@ -16,12 +16,22 @@ export default class ApplyColorGravityVisitor extends ApplyGravityVisitor {
       if (other == this.particle) continue
       let diff = this.particle.pos.subtract(other.pos);
       let colorCosine = this.particle.hue.cosineSimilarity(other.hue)
-      let frameCosine = Math.cos(this.frameNumber / 150)
-      let frameCosine2 = Math.cos(this.frameNumber / 450)
-      colorCosine = frameCosine2 * (frameCosine + (1-frameCosine)*colorCosine)
+
+      let colorFactorCosine = Math.cos(this.frameNumber / 151)
+      // this controls how much color controls gravity
+      colorCosine = (colorFactorCosine + (1-colorFactorCosine)*colorCosine)
+      // this controls how often everything switches to negative
+
+      let gravityPushPullCosine = Math.cos(this.frameNumber / 237)
+      colorCosine *= -0.2 / (1.1 + gravityPushPullCosine) + 1
+
+
+      //let frameCosine = Math.cos(this.frameNumber / 300)
+      //let frameCosine2 = Math.cos(this.frameNumber / 600)
+      //colorCosine = frameCosine2 * (frameCosine + (1-frameCosine)*colorCosine)
       let gravityStrength = (colorCosine * other.mass * this.gravityCoef)/diff.lengthSquared();
       let gravityVector = diff.multiply(gravityStrength);
-      if (gravityVector.length() > 10) gravityVector.multiplyMutate(10 / gravityVector.length())
+      if (gravityVector.length() > 20) gravityVector.multiplyMutate(20 / gravityVector.length())
       this.particle.spd.subtractMutate(gravityVector)
     }
   }

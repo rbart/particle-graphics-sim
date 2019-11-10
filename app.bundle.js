@@ -534,12 +534,14 @@ const BasicAdvancer_1 = __webpack_require__(/*! ./BasicAdvancer */ "./app/state/
 const WallBounceAdvancer_1 = __webpack_require__(/*! ./WallBounceAdvancer */ "./app/state/mutation/WallBounceAdvancer.ts");
 const QuadTreeGravityAdvancer_1 = __webpack_require__(/*! ./QuadTreeGravityAdvancer */ "./app/state/mutation/QuadTreeGravityAdvancer.ts");
 const AdvancerCollection_1 = __webpack_require__(/*! ./AdvancerCollection */ "./app/state/mutation/AdvancerCollection.ts");
+const FixedGravityAdvancer_1 = __webpack_require__(/*! ./FixedGravityAdvancer */ "./app/state/mutation/FixedGravityAdvancer.ts");
 class AdvancerCollectionBuilder {
     static createDefault(bounds) {
         let advancers = [
-            new WallBounceAdvancer_1.default(0.99, bounds),
-            new QuadTreeGravityAdvancer_1.default(0.06, bounds),
+            new WallBounceAdvancer_1.default(1, bounds),
+            new QuadTreeGravityAdvancer_1.default(0.03, bounds),
             new BasicAdvancer_1.default(),
+            new FixedGravityAdvancer_1.default(bounds.extents.multiply(0.5), 1, 0.04)
         ];
         return new AdvancerCollection_1.default(advancers);
     }
@@ -573,13 +575,19 @@ class ApplyColorGravityVisitor extends ApplyGravityVisitor_1.default {
                 continue;
             let diff = this.particle.pos.subtract(other.pos);
             let colorCosine = this.particle.hue.cosineSimilarity(other.hue);
-            let frameCosine = Math.cos(this.frameNumber / 150);
-            let frameCosine2 = Math.cos(this.frameNumber / 450);
-            colorCosine = frameCosine2 * (frameCosine + (1 - frameCosine) * colorCosine);
+            let colorFactorCosine = Math.cos(this.frameNumber / 151);
+            // this controls how much color controls gravity
+            colorCosine = (colorFactorCosine + (1 - colorFactorCosine) * colorCosine);
+            // this controls how often everything switches to negative
+            let gravityPushPullCosine = Math.cos(this.frameNumber / 237);
+            colorCosine *= -0.2 / (1.1 + gravityPushPullCosine) + 1;
+            //let frameCosine = Math.cos(this.frameNumber / 300)
+            //let frameCosine2 = Math.cos(this.frameNumber / 600)
+            //colorCosine = frameCosine2 * (frameCosine + (1-frameCosine)*colorCosine)
             let gravityStrength = (colorCosine * other.mass * this.gravityCoef) / diff.lengthSquared();
             let gravityVector = diff.multiply(gravityStrength);
-            if (gravityVector.length() > 10)
-                gravityVector.multiplyMutate(10 / gravityVector.length());
+            if (gravityVector.length() > 20)
+                gravityVector.multiplyMutate(20 / gravityVector.length());
             this.particle.spd.subtractMutate(gravityVector);
         }
     }
@@ -649,12 +657,45 @@ Object.defineProperty(exports, "__esModule", { value: true });
 class BasicAdvancer {
     advance(particles) {
         for (let particle of particles) {
-            particle.spd.multiplyMutate(0.992);
+            particle.spd.multiplyMutate(0.994);
             particle.pos.addMutate(particle.spd);
         }
     }
 }
 exports.default = BasicAdvancer;
+
+
+/***/ }),
+
+/***/ "./app/state/mutation/FixedGravityAdvancer.ts":
+/*!****************************************************!*\
+  !*** ./app/state/mutation/FixedGravityAdvancer.ts ***!
+  \****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+class FixedGravityAdvancer {
+    constructor(point, mass, gravityCoef) {
+        this.point = point;
+        this.mass = mass;
+        this.gravityCoef = gravityCoef;
+    }
+    advance(particles) {
+        for (let i = 0; i < particles.length; i++) {
+            let p1 = particles[i];
+            let diff = p1.pos.subtract(this.point);
+            let gravityStrength = this.mass / (diff.length()) * this.gravityCoef;
+            let gravityVector = diff.multiply(gravityStrength);
+            if (gravityVector.length() > 20)
+                gravityVector.multiplyMutate(20 / gravityVector.length());
+            p1.spd.subtractMutate(gravityVector);
+        }
+    }
+}
+exports.default = FixedGravityAdvancer;
 
 
 /***/ }),
