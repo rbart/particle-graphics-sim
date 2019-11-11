@@ -28,8 +28,8 @@ let particles: Particle[] = []
 
 let particleBuilder = new ParticleBuilder(c.width, c.height);
 
-for (var i = 0; i < 4000; i++) {
-  let particle: Particle = particleBuilder.generateRandomParticle(0.3, 1.5, 1.5);
+for (var i = 0; i < 3000; i++) {
+  let particle: Particle = particleBuilder.generateRandomParticle(1, 1.25, 1.25);
   particles.push(particle);
 }
 

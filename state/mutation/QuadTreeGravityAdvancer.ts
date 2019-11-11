@@ -56,11 +56,5 @@ export default class QuadTreeGravityAdvancer implements Advancer {
 
   private getGravityVisitor(particle: Particle): ApplyGravityVisitor {
     return new ApplyColorGravityVisitor(particle, this.gravityCoef, this.frame)
-    //return new ApplyGravityVisitor(particle, this.gravityCoef)
-    // if (this.frame % 1000 > 500) {
-    //   return new ApplyGravityVisitor(particle, this.gravityCoef)
-    // } else {
-    //   return new ApplyColorGravityVisitor(particle, this.gravityCoef, this.frame)
-    // }
   }
 }

@@ -262,8 +262,8 @@ c.addEventListener("click", fullscreen);
 let ctx = c.getContext("2d");
 let particles = [];
 let particleBuilder = new ParticleBuilder_1.default(c.width, c.height);
-for (var i = 0; i < 4000; i++) {
-    let particle = particleBuilder.generateRandomParticle(0.3, 1.5, 1.5);
+for (var i = 0; i < 3000; i++) {
+    let particle = particleBuilder.generateRandomParticle(1, 1.25, 1.25);
     particles.push(particle);
 }
 let bounds = new Rectangle_1.default(new Vector2d_1.default(0, 0), new Vector2d_1.default(c.width, c.height));
@@ -797,12 +797,6 @@ class QuadTreeGravityAdvancer {
     }
     getGravityVisitor(particle) {
         return new ApplyColorGravityVisitor_1.default(particle, this.gravityCoef, this.frame);
-        //return new ApplyGravityVisitor(particle, this.gravityCoef)
-        // if (this.frame % 1000 > 500) {
-        //   return new ApplyGravityVisitor(particle, this.gravityCoef)
-        // } else {
-        //   return new ApplyColorGravityVisitor(particle, this.gravityCoef, this.frame)
-        // }
     }
 }
 exports.default = QuadTreeGravityAdvancer;
