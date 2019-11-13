@@ -54,6 +54,7 @@ setInterval(function() {
 }, 2000)
 
 function frame() {
+  lastFrames++
   advancer.advance(particles);
   requestAnimationFrame(frame);
   renderer.render(particles);
