@@ -281,6 +281,7 @@ setInterval(function () {
     lastFrameReportTime = now;
 }, 2000);
 function frame() {
+    lastFrames++;
     advancer.advance(particles);
     requestAnimationFrame(frame);
     renderer.render(particles);
@@ -792,9 +793,6 @@ class QuadTreeGravityAdvancer {
     }
     advance(particles) {
         this.frame++;
-        if (this.frame % 100 == 0) {
-            console.log("Frame: " + this.frame + " Cos: " + Math.cos(this.frame / 500));
-        }
         this.quadTree.clear();
         for (let particle of particles) {
             this.quadTree.add(particle);

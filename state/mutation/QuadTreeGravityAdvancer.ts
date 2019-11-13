@@ -35,10 +35,6 @@ export default class QuadTreeGravityAdvancer implements Advancer {
   advance(particles: Particle[]): void {
 
     this.frame++
-    if (this.frame % 100 == 0) {
-       console.log("Frame: " + this.frame + " Cos: " + Math.cos(this.frame / 500))
-
-    }
 
     this.quadTree.clear()
 
