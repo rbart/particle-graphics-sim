@@ -41,10 +41,22 @@ renderer.initialize();
 
 let advancer: Advancer = AdvancerBuilder.createDefault(bounds);
 
+let lastFrames = 0
+let lastFrameReportTime = Date.now()
+
+setInterval(function() {
+  let now = Date.now()
+  let seconds = (now - lastFrameReportTime) / 1000
+  let fps = lastFrames / seconds
+  console.log("FPS: " + fps.toFixed(1))
+  lastFrames = 0
+  lastFrameReportTime = now
+}, 2000)
+
 function frame() {
   advancer.advance(particles);
-  renderer.render(particles);
   requestAnimationFrame(frame);
+  renderer.render(particles);
 }
 
 requestAnimationFrame(frame);
