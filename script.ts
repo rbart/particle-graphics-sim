@@ -28,8 +28,8 @@ let particles: Particle[] = []
 
 let particleBuilder = new ParticleBuilder(c.width, c.height);
 
-for (var i = 0; i < 3000; i++) {
-  let particle: Particle = particleBuilder.generateRandomParticle(1, 1.25, 1.25);
+for (var i = 0; i < 2000; i++) {
+  let particle: Particle = particleBuilder.generateRandomParticle(0.3, 1.5, 1.5);
   particles.push(particle);
 }
 
@@ -41,10 +41,22 @@ renderer.initialize();
 
 let advancer: Advancer = AdvancerBuilder.createDefault(bounds);
 
+let lastFrames = 0
+let lastFrameReportTime = Date.now()
+
+setInterval(function() {
+  let now = Date.now()
+  let seconds = (now - lastFrameReportTime) / 1000
+  let fps = lastFrames / seconds
+  console.log("FPS: " + fps.toFixed(1))
+  lastFrames = 0
+  lastFrameReportTime = now
+}, 2000)
+
 function frame() {
   advancer.advance(particles);
-  renderer.render(particles);
   requestAnimationFrame(frame);
+  renderer.render(particles);
 }
 
 requestAnimationFrame(frame);

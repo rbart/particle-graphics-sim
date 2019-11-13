@@ -262,18 +262,28 @@ c.addEventListener("click", fullscreen);
 let ctx = c.getContext("2d");
 let particles = [];
 let particleBuilder = new ParticleBuilder_1.default(c.width, c.height);
-for (var i = 0; i < 3000; i++) {
-    let particle = particleBuilder.generateRandomParticle(1, 1.25, 1.25);
+for (var i = 0; i < 2000; i++) {
+    let particle = particleBuilder.generateRandomParticle(0.3, 1.5, 1.5);
     particles.push(particle);
 }
 let bounds = new Rectangle_1.default(new Vector2d_1.default(0, 0), new Vector2d_1.default(c.width, c.height));
 let renderer = RendererCollectionBuilder_1.default.createDefault(ctx, bounds, 0.7);
 renderer.initialize();
 let advancer = AdvancerCollectionBuilder_1.default.createDefault(bounds);
+let lastFrames = 0;
+let lastFrameReportTime = Date.now();
+setInterval(function () {
+    let now = Date.now();
+    let seconds = (now - lastFrameReportTime) / 1000;
+    let fps = lastFrames / seconds;
+    console.log("FPS: " + fps.toFixed(1));
+    lastFrames = 0;
+    lastFrameReportTime = now;
+}, 2000);
 function frame() {
     advancer.advance(particles);
-    renderer.render(particles);
     requestAnimationFrame(frame);
+    renderer.render(particles);
 }
 requestAnimationFrame(frame);
 
