@@ -33,11 +33,26 @@ export class Configuration {
 }
 
 export default class Configurations {
+
   public static SimpleGravityConfig = new Configuration(
     new BasicParticleBuilder(2000, 1, 1.25, 1.25),
     [
       new WallBounceAdvancerFactory(0.9),
       new QuadTreeGravityAdvancerFactory(new ApplyGravityVisitorFactory(0.03)),
+      new BasicAdvancerFactory(1)
+    ],
+    [
+      new FadeRendererFactory(0.7),
+      new ParticleRendererFactory(),
+      new QuadTreeRendererFactory()
+    ]
+  )
+
+  public static VariableMassGravityConfig = new Configuration(
+    new BasicParticleBuilder(1000, 1, 1, 4),
+    [
+      new WallBounceAdvancerFactory(0.9),
+      new QuadTreeGravityAdvancerFactory(new ApplyGravityVisitorFactory(0.01)),
       new BasicAdvancerFactory(1)
     ],
     [

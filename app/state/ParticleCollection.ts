@@ -2,8 +2,6 @@ import QuadTreeCollectionFactory from '../datastructure/QuadTreeCollectionFactor
 import Collection from '../datastructure/Collection'
 import Particle from './Particle'
 import Vector2d from './Vector2d'
-import Vector3d from './Vector3d';
-import HasPosition2d from './HasPosition2d';
 import Rectangle from './Rectangle';
 
 export class ParticleCollectionFactory implements QuadTreeCollectionFactory<ParticleCollection> {

@@ -11,8 +11,8 @@ export class BasicParticleBuilder {
   constructor(
     private readonly numParticles: number,
     private readonly maxSpeed: number,
-    private readonly minRadius: number,
-    private readonly maxRadius: number,
+    private readonly minMass: number,
+    private readonly maxMass: number,
   ) { }
 
   generateParticles(bounds: Rectangle): Particle[] {
@@ -24,7 +24,8 @@ export class BasicParticleBuilder {
   }
 
   private generateParticle(bounds: Rectangle): Particle {
-    let radius = Math.floor(Math.random() * (this.maxRadius - this.minRadius)) + this.minRadius;
+    let mass = Math.floor(Math.random() * (this.maxMass - this.minMass)) + this.minMass;
+    let radius = Math.max(Math.sqrt(mass), 0.5)
     let randomPosition = bounds.origin.add(new Vector2d(
       Math.floor(Math.random() * bounds.extents.x - radius) + radius,
       Math.floor(Math.random() * bounds.extents.y - radius) + radius,
@@ -34,7 +35,7 @@ export class BasicParticleBuilder {
       Math.random() * this.maxSpeed * 2 - this.maxSpeed,
     );
     return new Particle(
-      randomPosition, randomSpeed, radius, radius, this.getRndHue()
+      randomPosition, randomSpeed, mass, radius, this.getRndHue()
     );
   }
 
