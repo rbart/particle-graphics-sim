@@ -1,7 +1,8 @@
 import Advancer from './Advancer'
 import Particle from '../Particle'
 
-export default class GravityAdvancer implements Advancer {
+
+export default class DeprecatedGravityAdvancer implements Advancer {
 
   constructor(readonly gravityCoef: number) { }
 

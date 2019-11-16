@@ -1,7 +1,7 @@
 import Advancer from "./Advancer"
 import Particle from '../Particle'
 
-export default class AdvancerBuilder implements Advancer {
+export default class AdvancerCollection implements Advancer {
 
   constructor(private advancers: Advancer[]) {}
 

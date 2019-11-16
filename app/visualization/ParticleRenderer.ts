@@ -1,12 +1,16 @@
 import Particle from '../state/Particle'
 import Vector2d from '../state/Vector2d'
-import Renderer from './Renderer'
+import Renderer, { RendererFactory } from './Renderer'
 import Rectangle from '../state/Rectangle';
 
-export default class CanvasRenderer implements Renderer {
-  constructor(
-    readonly ctx: CanvasRenderingContext2D,
-    readonly rectangle: Rectangle) { }
+export class ParticleRendererFactory implements RendererFactory {
+  createInstance(_: Rectangle, ctx: CanvasRenderingContext2D): Renderer {
+    return new ParticleRenderer(ctx)
+  }
+}
+
+export default class ParticleRenderer implements Renderer {
+  constructor(readonly ctx: CanvasRenderingContext2D) { }
 
   initialize() { }
 
@@ -23,7 +27,6 @@ export default class CanvasRenderer implements Renderer {
   }
 
   private drawPathLine(particle: Particle): void {
-    // TODO: particles could remember their own lastpos.
     this.ctx.moveTo(particle.pos.x, particle.pos.y)
     let spdVect = particle.spd;
     let lengthSquared = spdVect.lengthSquared()

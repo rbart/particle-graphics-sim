@@ -1,11 +1,9 @@
 import Particle from "./state/Particle";
-import ParticleBuilder from "./state/ParticleBuilder"
 import Advancer from "./state/mutation/Advancer"
-import AdvancerBuilder from "./state/mutation/AdvancerCollectionBuilder"
 import Renderer from "./visualization/Renderer"
-import RendererCollectionBuilder from "./visualization/RendererCollectionBuilder"
 import Vector2d from "./state/Vector2d";
 import Rectangle from "./state/Rectangle";
+import Configurations from './state/Configurations'
 
 var c = <HTMLCanvasElement>document.getElementById("canvas");
 c.width  = window.innerWidth;
@@ -24,27 +22,34 @@ c.addEventListener("click",fullscreen)
 
 let ctx: CanvasRenderingContext2D = <CanvasRenderingContext2D>c.getContext("2d")
 
-let particles: Particle[] = []
-
-let particleBuilder = new ParticleBuilder(c.width, c.height);
-
-for (var i = 0; i < 2500; i++) {
-  let particle: Particle = particleBuilder.generateRandomParticle(0.3, 1, 1);
-  particles.push(particle);
-}
-
 let bounds: Rectangle = new Rectangle(new Vector2d(0,0), new Vector2d(c.width, c.height))
 
-let renderer: Renderer = RendererCollectionBuilder.createDefault(ctx, bounds, 0.7);
+let configuration = Configurations.OscillatingColorGravityConfig
 
-renderer.initialize();
+let particles: Particle[] = configuration.particleBuilder.generateParticles(bounds)
+let renderer: Renderer = configuration.getRenderer(bounds, ctx);
+let advancer: Advancer = configuration.getAdvancer(bounds);
 
-let advancer: Advancer = AdvancerBuilder.createDefault(bounds);
-
-function frame() {
-  advancer.advance(particles);
-  renderer.render(particles);
-  requestAnimationFrame(frame);
+let frameNumber = 0
+function framesPerSecondLogger() {
+  let lastFrameReportTime = Date.now()
+  return function() {
+    let now = Date.now()
+    let seconds = (now - lastFrameReportTime) / 1000
+    let fps = frameNumber / seconds
+    console.log("FPS: " + fps.toFixed(1))
+    frameNumber = 0
+    lastFrameReportTime = now
+  }
 }
 
-requestAnimationFrame(frame);
+setInterval(framesPerSecondLogger(), 2000)
+
+function drawFrame() {
+  frameNumber++
+  advancer.advance(particles);
+  requestAnimationFrame(drawFrame);
+  renderer.render(particles);
+}
+
+requestAnimationFrame(drawFrame);

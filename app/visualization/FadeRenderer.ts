@@ -1,6 +1,13 @@
 import Particle from '../state/Particle'
-import Renderer from './Renderer'
+import Renderer, { RendererFactory } from './Renderer'
 import Rectangle from '../state/Rectangle';
+
+export class FadeRendererFactory implements RendererFactory {
+  constructor(readonly fadeRate: number) { }
+  createInstance(bounds: Rectangle, ctx: CanvasRenderingContext2D): Renderer {
+    return new FadeRenderer(ctx, bounds, this.fadeRate)
+  }
+}
 
 export default class FadeRenderer implements Renderer {
   constructor(
