@@ -2,6 +2,7 @@ import Particle from "../Particle"
 import QuadTreeVisitor from "../../datastructure/QuadTreeVisitor"
 import { QuadTreeInnerNode, QuadTreeLeafNode } from "../../datastructure/QuadTreeNode"
 import ParticleCollection from "../ParticleCollection"
+import GravityVisitorFactory from "./GravityVisitorFactory"
 
 export default class ApplyGravityVisitor implements QuadTreeVisitor<Particle, ParticleCollection> {
 
@@ -26,10 +27,21 @@ export default class ApplyGravityVisitor implements QuadTreeVisitor<Particle, Pa
   protected apply(particles: Particle[]): void {
     for (let other of particles) {
       if (other == this.particle) continue
-      let diff = this.particle.pos.subtract(other.pos);
-      let gravityStrength = other.mass/(diff.lengthSquared()) * this.gravityCoef;
-      let gravityVector = diff.multiply(gravityStrength);
-      this.particle.spd.subtractMutate(gravityVector)
+      this.applyGravityFrom(other)
     }
+  }
+
+  protected applyGravityFrom(other: Particle) {
+    let diff = this.particle.pos.subtract(other.pos);
+    let gravityStrength = other.mass/(diff.lengthSquared()) * this.gravityCoef;
+    let gravityVector = diff.multiply(gravityStrength)
+    this.particle.spd.subtractMutate(gravityVector)
+  }
+}
+
+export class ApplyGravityVisitorFactory implements GravityVisitorFactory<ApplyGravityVisitor> {
+  constructor(private readonly gravityCoef: number) {}
+  createInstance(particle: Particle): ApplyGravityVisitor {
+    return new ApplyGravityVisitor(particle, this.gravityCoef)
   }
 }

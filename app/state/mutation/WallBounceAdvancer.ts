@@ -2,13 +2,21 @@ import Advancer from './Advancer'
 import Particle from '../Particle'
 import Rectangle from '../Rectangle'
 import Vector2d from '../Vector2d'
+import AdvancerFactory from './AdvancerFactory'
+
+export class WallBounceAdvancerFactory implements AdvancerFactory {
+  constructor(readonly bounceCoef: number) { }
+  createInstance(bounds: Rectangle): WallBounceAdvancer {
+    return new WallBounceAdvancer(bounds, this.bounceCoef)
+  }
+}
 
 export default class WallBounceAdvancer implements Advancer {
 
   private origin: Vector2d
   private outer: Vector2d
 
-  constructor(readonly bounceCoef: number, readonly bounds: Rectangle) {
+  constructor(readonly bounds: Rectangle, readonly bounceCoef: number) {
     this.origin = bounds.origin
     this.outer = bounds.origin.add(bounds.extents)
   }
