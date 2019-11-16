@@ -33,7 +33,7 @@ export default class ApplyGravityVisitor implements QuadTreeVisitor<Particle, Pa
 
   protected applyGravityFrom(other: Particle) {
     let diff = this.particle.pos.subtract(other.pos);
-    let gravityStrength = other.mass/(diff.lengthSquared()) * this.gravityCoef;
+    let gravityStrength = (1/(diff.lengthSquared())) * this.gravityCoef * other.mass;
     let gravityVector = diff.multiply(gravityStrength)
     this.particle.spd.subtractMutate(gravityVector)
   }
