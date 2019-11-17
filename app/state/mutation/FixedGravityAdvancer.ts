@@ -28,10 +28,11 @@ export default class FixedGravityAdvancer implements Advancer {
   advance(particles: Particle[]): void {
     for (let i = 0; i < particles.length; i++) {
       let p1 = particles[i]
-      let diff = p1.pos.subtract(this.point);
-      let gravityStrength = this.mass/(diff.length()) * this.gravityCoef
-      let gravityVector = diff.multiply(gravityStrength);
-      if (gravityVector.length() > 20) gravityVector.multiplyMutate(20 / gravityVector.length())
+      let diff = p1.pos.subtract(this.point)
+      let diffUnit = diff.multiply(1 / diff.length())
+      let gravityStrength = (this.mass * this.gravityCoef)/(diff.lengthSquared())
+      let gravityVector = diffUnit.multiply(gravityStrength)
+      //if (gravityVector.length() > 20) gravityVector.multiplyMutate(20 / gravityVector.length())
       p1.spd.subtractMutate(gravityVector)
     }
   }
