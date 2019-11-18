@@ -18,6 +18,7 @@ import { QuadTreeRendererFactory } from "../visualization/QuadTreeRenderer";
 import { ApplyGravityVisitorFactory } from "./mutation/ApplyGravityVisitor";
 import { RadialParticleBuilder } from "./RadialParticleBuilder";
 import { GravityAdvancerFactory } from "./mutation/GravityAdvancer";
+import { CyclingAdvancerCollectionFactory } from "./mutation/CyclingAdvancerCollection";
 
 let GRAVITY_COEF = 2.0
 
@@ -36,7 +37,48 @@ export class Configuration {
   }
 }
 
+let colorAttract =           [
+            new WallBounceAdvancerFactory(0.9),
+            new QuadTreeGravityAdvancerFactory(new ApplyColorGravityVisitorFactory(2*GRAVITY_COEF)),
+            new BasicAdvancerFactory(0.985)
+          ]
+let colorRepel =           [
+            new WallBounceAdvancerFactory(0.9),
+            new QuadTreeGravityAdvancerFactory(new ApplyColorGravityVisitorFactory(-2*GRAVITY_COEF)),
+            new BasicAdvancerFactory(0.98)
+          ]
+let stdAttract =           [
+            new WallBounceAdvancerFactory(0.9),
+            new QuadTreeGravityAdvancerFactory(new ApplyGravityVisitorFactory(2*GRAVITY_COEF)),
+            new BasicAdvancerFactory(0.98)
+          ]
+let stdRepel =           [
+            new WallBounceAdvancerFactory(0.9),
+            new QuadTreeGravityAdvancerFactory(new ApplyGravityVisitorFactory(-2*GRAVITY_COEF)),
+            new BasicAdvancerFactory(0.98)
+          ]
+
 export default class Configurations {
+
+
+
+  public static CyclingConfig = new Configuration(
+    new BasicParticleBuilder(3000, 1, 1, 1),
+    [
+      new CyclingAdvancerCollectionFactory(6,
+        [
+          stdAttract, stdAttract,
+          colorAttract, colorAttract, colorAttract, colorAttract,
+          stdRepel,
+          colorRepel,
+        ])
+    ],
+    [
+      new FadeRendererFactory(0.7),
+      new QuadTreeRendererFactory(0.1),
+      new ParticleRendererFactory()
+    ]
+  )
 
   public static RadialParticleGravityConfig = new Configuration(
     new RadialParticleBuilder(2000, 120, 300, GRAVITY_COEF, 400),
@@ -90,4 +132,5 @@ export default class Configurations {
       new ParticleRendererFactory()
     ]
   )
+  static colorAttract: AdvancerFactory[][];
 }

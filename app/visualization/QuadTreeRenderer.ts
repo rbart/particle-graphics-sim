@@ -7,8 +7,9 @@ import ParticleCollection, { ParticleCollectionFactory } from '../state/Particle
 import Rectangle from '../state/Rectangle'
 
 export class QuadTreeRendererFactory implements RendererFactory {
+  constructor(private readonly opacity: number) { }
   createInstance(bounds: Rectangle, ctx: CanvasRenderingContext2D): Renderer {
-    return new QuadTreeRenderer(bounds, ctx)
+    return new QuadTreeRenderer(bounds, ctx, this.opacity)
   }
 }
 
@@ -18,7 +19,8 @@ export default class QuadTreeRenderer implements Renderer {
 
   constructor(
     readonly bounds: Rectangle,
-    readonly ctx: CanvasRenderingContext2D)  {
+    readonly ctx: CanvasRenderingContext2D,
+    readonly opacity: number)  {
     // TODO: don't create the quadtree at all here. We should reuse a single quadTree
     // throughout
     let minNodeSize = bounds.extents.length() / 80
@@ -39,7 +41,7 @@ export default class QuadTreeRenderer implements Renderer {
 
     let initialAlpha = this.ctx.globalAlpha;
     this.ctx.lineWidth = 0.5
-    this.ctx.globalAlpha = 0.2
+    this.ctx.globalAlpha = this.opacity
     this.ctx.strokeStyle = "rgb(100,100,100)";
     this.ctx.beginPath();
 
