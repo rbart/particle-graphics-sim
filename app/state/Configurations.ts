@@ -39,11 +39,11 @@ export class Configuration {
 export default class Configurations {
 
   public static RadialParticleGravityConfig = new Configuration(
-    new RadialParticleBuilder(2000, 120, 300, GRAVITY_COEF, 200),
+    new RadialParticleBuilder(2000, 120, 300, GRAVITY_COEF, 400),
     [
       new BasicAdvancerFactory(1.0),
-      new FixedGravityAdvancerFactory(new Vector2d(0.5, 0.5), 200, GRAVITY_COEF),
-      new QuadTreeGravityAdvancerFactory(new ApplyGravityVisitorFactory(GRAVITY_COEF)),
+      new FixedGravityAdvancerFactory(new Vector2d(0.5, 0.5), 400, GRAVITY_COEF),
+      //new QuadTreeGravityAdvancerFactory(new ApplyGravityVisitorFactory(GRAVITY_COEF)),
       new WallBounceAdvancerFactory(1)
     ],
     [

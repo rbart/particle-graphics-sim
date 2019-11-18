@@ -25,8 +25,8 @@ export default class GravityAdvancer implements Advancer {
         if (!isFinite(p2.pos.length())) continue
         let diff = p1.pos.subtract(p2.pos);
         let diffUnit = diff.multiply(1.0 / diff.length())
-        let radSumSquared = (p1.rad + p2.rad) * (p1.rad + p2.rad)
-        let gravityStrength = (this.gravityCoef)/(diff.lengthSquared() + radSumSquared);
+        let radSum = p1.rad + p2.rad
+        let gravityStrength = (this.gravityCoef)/(diff.lengthSquared() + radSum);
         gravityStrength = Math.min(10, gravityStrength)
         let gravityVector = diffUnit.multiply(gravityStrength);
         p1.spd.subtractMutate(gravityVector.multiply(p2.mass))

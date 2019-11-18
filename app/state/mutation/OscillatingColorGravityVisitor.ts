@@ -23,9 +23,9 @@ export default class OscillatingColorGravityVisitor extends ApplyColorGravityVis
     let colorCosine = this.particle.hue.cosineSimilarity(other.hue)
     colorCosine = (this.colorFactorCosine + (1 - this.colorFactorCosine)*colorCosine)
     colorCosine *= this.gravityPushPullCosine
-    let radSumSquared = (this.particle.rad + other.rad) * (this.particle.rad + other.rad)
+    let radSum = this.particle.rad + other.rad
     let gravityStrength =
-      (colorCosine * other.mass * this.gravityCoef) / (gravityVector.lengthSquared() + radSumSquared)
+      (colorCosine * other.mass * this.gravityCoef) / (gravityVector.lengthSquared() + radSum)
     gravityStrength = Math.min(10, gravityStrength)
     gravityVector.multiplyMutate(gravityStrength / gravityVector.length())
     this.particle.spd.subtractMutate(gravityVector)

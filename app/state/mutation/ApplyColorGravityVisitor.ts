@@ -14,9 +14,9 @@ export default class ApplyColorGravityVisitor extends ApplyGravityVisitor {
   protected applyGravityFrom(other: Particle): void {
     let gravityVector = this.particle.pos.subtract(other.pos)
     let colorCosine = this.particle.hue.cosineSimilarity(other.hue)
-    let radSumSquared = (this.particle.rad + other.rad)// * (this.particle.rad + other.rad)
+    let radSum = this.particle.rad + other.rad
     let gravityStrength =
-      (colorCosine * other.mass * this.gravityCoef) / (gravityVector.lengthSquared() + radSumSquared)
+      (colorCosine * other.mass * this.gravityCoef) / (gravityVector.lengthSquared() + radSum)
     gravityStrength = Math.min(10, gravityStrength)
     gravityVector.multiplyMutate(gravityStrength / gravityVector.length())
     this.particle.spd.subtractMutate(gravityVector)
