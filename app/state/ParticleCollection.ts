@@ -6,7 +6,7 @@ import Rectangle from './Rectangle';
 
 export class ParticleCollectionFactory implements QuadTreeCollectionFactory<ParticleCollection> {
 
-  private static readonly defaultBufferWidthConstant: number = (1 / 6)
+  private static readonly defaultBufferWidthConstant: number = (1 / 7)
 
   constructor(private readonly bufferWidthConstant: number =
     ParticleCollectionFactory.defaultBufferWidthConstant) { }

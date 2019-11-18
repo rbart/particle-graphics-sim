@@ -16,6 +16,10 @@ import ParticleBuilder, { BasicParticleBuilder } from "./ParticleBuilder";
 import { ApplyColorGravityVisitorFactory } from "./mutation/ApplyColorGravityVisitor";
 import { QuadTreeRendererFactory } from "../visualization/QuadTreeRenderer";
 import { ApplyGravityVisitorFactory } from "./mutation/ApplyGravityVisitor";
+import { RadialParticleBuilder } from "./RadialParticleBuilder";
+import { GravityAdvancerFactory } from "./mutation/GravityAdvancer";
+
+let GRAVITY_COEF = 2.0
 
 export class Configuration {
   constructor(
@@ -34,41 +38,13 @@ export class Configuration {
 
 export default class Configurations {
 
-  public static SimpleGravityConfig = new Configuration(
-    new BasicParticleBuilder(2000, 1, 1.25, 1.25),
+  public static RadialParticleGravityConfig = new Configuration(
+    new RadialParticleBuilder(2000, 120, 300, GRAVITY_COEF, 400),
     [
-      new WallBounceAdvancerFactory(0.9),
-      new QuadTreeGravityAdvancerFactory(new ApplyGravityVisitorFactory(0.03)),
-      new BasicAdvancerFactory(1)
-    ],
-    [
-      new FadeRendererFactory(0.7),
-      new ParticleRendererFactory(),
-      new QuadTreeRendererFactory()
-    ]
-  )
-
-  public static VariableMassGravityConfig = new Configuration(
-    new BasicParticleBuilder(1000, 1, 1, 4),
-    [
-      new WallBounceAdvancerFactory(0.9),
-      new QuadTreeGravityAdvancerFactory(new ApplyGravityVisitorFactory(0.01)),
-      new BasicAdvancerFactory(1)
-    ],
-    [
-      new FadeRendererFactory(0.7),
-      new ParticleRendererFactory(),
-      new QuadTreeRendererFactory()
-    ]
-  )
-
-  public static ColorGravityConfig = new Configuration(
-    new BasicParticleBuilder(2000, 1, 1.25, 1.25),
-    [
-      new WallBounceAdvancerFactory(0.6),
-      new QuadTreeGravityAdvancerFactory(new ApplyColorGravityVisitorFactory(0.03)),
-      new BasicAdvancerFactory(1),
-      new FixedGravityAdvancerFactory(new Vector2d(0.5, 0.5), 1, 0.04)
+      new BasicAdvancerFactory(1.0),
+      new FixedGravityAdvancerFactory(new Vector2d(0.5, 0.5), 400, GRAVITY_COEF),
+      //new QuadTreeGravityAdvancerFactory(new ApplyGravityVisitorFactory(GRAVITY_COEF)),
+      new WallBounceAdvancerFactory(1)
     ],
     [
       new FadeRendererFactory(0.7),
@@ -76,13 +52,25 @@ export default class Configurations {
     ]
   )
 
-  public static ColorDragGravityConfig = new Configuration(
+  public static SimpleGravityConfig = new Configuration(
     new BasicParticleBuilder(2000, 1, 1.25, 1.25),
     [
-      new WallBounceAdvancerFactory(1),
-      new QuadTreeGravityAdvancerFactory(new ApplyColorGravityVisitorFactory(0.03)),
-      new BasicAdvancerFactory(0.95),
-      new FixedGravityAdvancerFactory(new Vector2d(0.5, 0.5), 1, 0.04)
+      new WallBounceAdvancerFactory(0.9),
+      new QuadTreeGravityAdvancerFactory(new ApplyGravityVisitorFactory(GRAVITY_COEF)),
+      new BasicAdvancerFactory(0.99),
+    ],
+    [
+      new FadeRendererFactory(0.7),
+      new ParticleRendererFactory()
+    ]
+  )
+
+  public static ColorGravityConfig = new Configuration(
+    new BasicParticleBuilder(2000, 1, 1.25, 1.25),
+    [
+      new WallBounceAdvancerFactory(0.5),
+      new QuadTreeGravityAdvancerFactory(new ApplyColorGravityVisitorFactory(GRAVITY_COEF)),
+      new BasicAdvancerFactory(1.0)
     ],
     [
       new FadeRendererFactory(0.7),
@@ -94,9 +82,8 @@ export default class Configurations {
     new BasicParticleBuilder(2000, 1, 1.25, 1.25),
     [
       new WallBounceAdvancerFactory(1.0),
-      new QuadTreeGravityAdvancerFactory(new OscillatingColorGravityVisitorFactory(0.03)),
-      new BasicAdvancerFactory(0.995),
-      new FixedGravityAdvancerFactory(new Vector2d(0.5, 0.5), 1, 0.04)
+      new QuadTreeGravityAdvancerFactory(new OscillatingColorGravityVisitorFactory(GRAVITY_COEF)),
+      new BasicAdvancerFactory(1.0)
     ],
     [
       new FadeRendererFactory(0.7),
