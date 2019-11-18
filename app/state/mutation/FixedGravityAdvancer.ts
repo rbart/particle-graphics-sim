@@ -13,6 +13,7 @@ export class FixedGravityAdvancerFactory implements AdvancerFactory {
 
 export default class FixedGravityAdvancer implements Advancer {
   point: Vector2d
+  effectiveRadius: number;
   constructor(
       bounds: Rectangle,
       point: Vector2d,
@@ -23,16 +24,18 @@ export default class FixedGravityAdvancer implements Advancer {
       bounds.extents.x * point.x,
       bounds.extents.y * point.y)
     this.point = bounds.origin.add(scaledPoint)
+    this.effectiveRadius = Math.sqrt(Math.abs(mass))
   }
 
   advance(particles: Particle[]): void {
     for (let i = 0; i < particles.length; i++) {
       let p1 = particles[i]
-      let diff = p1.pos.subtract(this.point)
-      let diffUnit = diff.multiply(1 / diff.length())
-      let gravityStrength = (this.mass * this.gravityCoef)/(diff.lengthSquared())
-      let gravityVector = diffUnit.multiply(gravityStrength)
-      //if (gravityVector.length() > 20) gravityVector.multiplyMutate(20 / gravityVector.length())
+      let gravityVector = p1.pos.subtract(this.point);
+      let radSumSquared = (p1.rad + this.effectiveRadius) * (p1.rad + this.effectiveRadius)
+      let gravityStrength =
+        (this.mass * this.gravityCoef) / (gravityVector.lengthSquared() + radSumSquared)
+      gravityStrength = Math.min(10, gravityStrength)
+      gravityVector.multiplyMutate(gravityStrength / gravityVector.length())
       p1.spd.subtractMutate(gravityVector)
     }
   }

@@ -13,19 +13,21 @@ export default class OscillatingColorGravityVisitor extends ApplyColorGravityVis
     super(particle, gravityCoef)
     // TODO make these constants configurable, get time externally somehow.
     let frameNumber = Date.now() / 30
-    this.colorFactorCosine = Math.cos(frameNumber / 151)
-    this.gravityPushPullCosine = Math.cos(frameNumber / 237)
+    this.colorFactorCosine = Math.cos(frameNumber / 302)
+    this.gravityPushPullCosine = Math.cos(frameNumber / 517)
     this.gravityPushPullCosine = -0.2 / (1.1 + this.gravityPushPullCosine) + 1
   }
 
   protected applyGravityFrom(other: Particle): void {
-    let diff = this.particle.pos.subtract(other.pos);
+    let gravityVector = this.particle.pos.subtract(other.pos)
     let colorCosine = this.particle.hue.cosineSimilarity(other.hue)
     colorCosine = (this.colorFactorCosine + (1 - this.colorFactorCosine)*colorCosine)
     colorCosine *= this.gravityPushPullCosine
-    let gravityStrength = (colorCosine * other.mass * this.gravityCoef)/diff.lengthSquared();
-    let gravityVector = diff.multiply(gravityStrength);
-    if (gravityVector.length() > 20) gravityVector.multiplyMutate(20 / gravityVector.length())
+    let radSumSquared = (this.particle.rad + other.rad) * (this.particle.rad + other.rad)
+    let gravityStrength =
+      (colorCosine * other.mass * this.gravityCoef) / (gravityVector.lengthSquared() + radSumSquared)
+    gravityStrength = Math.min(10, gravityStrength)
+    gravityVector.multiplyMutate(gravityStrength / gravityVector.length())
     this.particle.spd.subtractMutate(gravityVector)
   }
 }

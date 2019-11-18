@@ -32,9 +32,11 @@ export default class ParticleAggregationVisitor implements QuadTreeVisitor<Parti
       aggregate.pos.setEqualTo(particle.pos)
       aggregate.hue.setEqualTo(particle.hue)
       aggregate.mass = particle.mass
+      aggregate.rad = particle.rad
     }
     else {
       let totalMass = 0
+      let totalRad = 0
       let avgPos = new Vector2d(0,0)
       let avgHue = new Vector2d(0,0)
       for (let particle of particles) {
@@ -47,6 +49,7 @@ export default class ParticleAggregationVisitor implements QuadTreeVisitor<Parti
       aggregate.pos.setEqualTo(avgPos)
       aggregate.hue.setEqualTo(avgHue)
       aggregate.mass = totalMass
+      aggregate.rad = Math.sqrt(totalMass)
     }
   }
 }

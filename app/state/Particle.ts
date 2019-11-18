@@ -11,7 +11,7 @@ export default class Particle implements HasPosition2d {
       readonly pos: Vector2d,
       readonly spd: Vector2d,
       public mass: number,
-      readonly rad: number,
+      public rad: number,
       readonly hue: Vector2d) {
 
     this.lastPos = new Vector2d(pos.x, pos.y)

@@ -21,7 +21,7 @@ export class RadialParticleBuilder {
   }
 
   private generateParticle(bounds: Rectangle): Particle {
-    let mass = 0//0.000001
+    let mass = 0.01
     let radius = 1
     let randomAngle = Math.random() * 2 * Math.PI
     let randomVector = new Vector2d(Math.cos(randomAngle), Math.sin(randomAngle))
