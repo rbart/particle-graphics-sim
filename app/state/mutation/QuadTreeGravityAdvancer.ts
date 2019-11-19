@@ -33,6 +33,7 @@ export default class QuadTreeGravityAdvancer
   advance(particles: Particle[]): void {
     this.quadTree.clear()
     for (let particle of particles) {
+      if (particle.mass == 0) continue 
       this.quadTree.add(particle)
     }
     this.quadTree.accept(this.particleAggregator)

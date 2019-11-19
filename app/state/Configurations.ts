@@ -19,6 +19,8 @@ import { ApplyGravityVisitorFactory } from "./mutation/ApplyGravityVisitor";
 import { RadialParticleBuilder } from "./RadialParticleBuilder";
 import { GravityAdvancerFactory } from "./mutation/GravityAdvancer";
 import { CyclingAdvancerCollectionFactory } from "./mutation/CyclingAdvancerCollection";
+import { CombinedParticuleBuilder, LiteralParticleBuilder } from "./LiteralParticleBuilder";
+import Particle from "./Particle";
 
 let GRAVITY_COEF = 2.0
 
@@ -37,30 +39,45 @@ export class Configuration {
   }
 }
 
-let colorAttract =           [
-            new WallBounceAdvancerFactory(0.9),
-            new QuadTreeGravityAdvancerFactory(new ApplyColorGravityVisitorFactory(2*GRAVITY_COEF)),
-            new BasicAdvancerFactory(0.985)
-          ]
-let colorRepel =           [
-            new WallBounceAdvancerFactory(0.9),
-            new QuadTreeGravityAdvancerFactory(new ApplyColorGravityVisitorFactory(-2*GRAVITY_COEF)),
-            new BasicAdvancerFactory(0.98)
-          ]
-let stdAttract =           [
-            new WallBounceAdvancerFactory(0.9),
-            new QuadTreeGravityAdvancerFactory(new ApplyGravityVisitorFactory(2*GRAVITY_COEF)),
-            new BasicAdvancerFactory(0.98)
-          ]
-let stdRepel =           [
-            new WallBounceAdvancerFactory(0.9),
-            new QuadTreeGravityAdvancerFactory(new ApplyGravityVisitorFactory(-2*GRAVITY_COEF)),
-            new BasicAdvancerFactory(0.98)
-          ]
+let colorAttract = [
+  new WallBounceAdvancerFactory(0.9),
+  new QuadTreeGravityAdvancerFactory(new ApplyColorGravityVisitorFactory(2*GRAVITY_COEF)),
+  new BasicAdvancerFactory(0.985)
+]
+let colorRepel = [
+  new WallBounceAdvancerFactory(0.9),
+  new QuadTreeGravityAdvancerFactory(new ApplyColorGravityVisitorFactory(-2*GRAVITY_COEF)),
+  new BasicAdvancerFactory(0.98)
+]
+let stdAttract = [
+  new WallBounceAdvancerFactory(0.9),
+  new QuadTreeGravityAdvancerFactory(new ApplyGravityVisitorFactory(2*GRAVITY_COEF)),
+  new BasicAdvancerFactory(0.98)
+]
+let stdRepel = [
+  new WallBounceAdvancerFactory(0.9),
+  new QuadTreeGravityAdvancerFactory(new ApplyGravityVisitorFactory(-2*GRAVITY_COEF)),
+  new BasicAdvancerFactory(0.98)
+]
 
 export default class Configurations {
 
-
+  public static OrbitalSim = new Configuration(
+    new CombinedParticuleBuilder([
+      new RadialParticleBuilder(3000, 200, 300, GRAVITY_COEF, 400, 0),
+      new RadialParticleBuilder(1, 150, 100, GRAVITY_COEF, 400, 3, 10),
+      new RadialParticleBuilder(1, 350, 400, GRAVITY_COEF, 400, 3, 10)
+    ]),
+    [
+      new BasicAdvancerFactory(1.0),
+      new FixedGravityAdvancerFactory(new Vector2d(0.5, 0.5), 400, GRAVITY_COEF),
+      new QuadTreeGravityAdvancerFactory(new ApplyGravityVisitorFactory(GRAVITY_COEF)),
+    ],
+    [
+      new FadeRendererFactory(1),
+      new ParticleRendererFactory()
+    ]
+  )
 
   public static CyclingConfig = new Configuration(
     new BasicParticleBuilder(3000, 1, 1, 1),
@@ -85,7 +102,6 @@ export default class Configurations {
     [
       new BasicAdvancerFactory(1.0),
       new FixedGravityAdvancerFactory(new Vector2d(0.5, 0.5), 400, GRAVITY_COEF),
-      //new QuadTreeGravityAdvancerFactory(new ApplyGravityVisitorFactory(GRAVITY_COEF)),
       new WallBounceAdvancerFactory(1)
     ],
     [

@@ -33,11 +33,13 @@ export default class ApplyGravityVisitor implements QuadTreeVisitor<Particle, Pa
 
   protected applyGravityFrom(other: Particle) {
     let gravityVector = this.particle.pos.subtract(other.pos)
+    let length = gravityVector.length()
     let radSum = this.particle.rad + other.rad
+    if (length < radSum) return
     let gravityStrength =
       (other.mass * this.gravityCoef) / (gravityVector.lengthSquared() + radSum)
     gravityStrength = Math.min(20, gravityStrength)
-    gravityVector.multiplyMutate(gravityStrength / gravityVector.length())
+    gravityVector.multiplyMutate(gravityStrength / length)
     this.particle.spd.subtractMutate(gravityVector)
   }
 }

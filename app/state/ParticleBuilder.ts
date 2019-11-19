@@ -6,7 +6,7 @@ export default interface ParticleBuilder {
   generateParticles(bounds: Rectangle): Particle[]
 }
 
-export class BasicParticleBuilder {
+export class BasicParticleBuilder implements ParticleBuilder {
 
   constructor(
     private readonly numParticles: number,
