@@ -64,14 +64,19 @@ export default class Configurations {
 
   public static OrbitalSim = new Configuration(
     new CombinedParticuleBuilder([
-      new RadialParticleBuilder(3000, 200, 300, GRAVITY_COEF, 400, 0),
-      new RadialParticleBuilder(1, 150, 100, GRAVITY_COEF, 400, 3, 10),
-      new RadialParticleBuilder(1, 350, 400, GRAVITY_COEF, 400, 3, 10)
+      new RadialParticleBuilder(1000, 100, 200, GRAVITY_COEF, 900, 0.1, 1.2),
+      new RadialParticleBuilder(2000, 200, 400, GRAVITY_COEF, 1200, 0.1, 1.2)
     ]),
     [
-      new BasicAdvancerFactory(1.0),
-      new FixedGravityAdvancerFactory(new Vector2d(0.5, 0.5), 400, GRAVITY_COEF),
-      new QuadTreeGravityAdvancerFactory(new ApplyGravityVisitorFactory(GRAVITY_COEF)),
+      new CyclingAdvancerCollectionFactory(25,
+        [
+          [
+            new BasicAdvancerFactory(0.9975),
+            new FixedGravityAdvancerFactory(new Vector2d(0.5, 0.5), 500, GRAVITY_COEF, 20),
+            new QuadTreeGravityAdvancerFactory(new ApplyColorGravityVisitorFactory(GRAVITY_COEF)),
+            new WallBounceAdvancerFactory(.3)
+          ]
+        ])
     ],
     [
       new FadeRendererFactory(1),
@@ -101,7 +106,7 @@ export default class Configurations {
     new RadialParticleBuilder(2000, 120, 300, GRAVITY_COEF, 400),
     [
       new BasicAdvancerFactory(1.0),
-      new FixedGravityAdvancerFactory(new Vector2d(0.5, 0.5), 400, GRAVITY_COEF),
+      new FixedGravityAdvancerFactory(new Vector2d(0.5, 0.5), 400, GRAVITY_COEF, 20),
       new WallBounceAdvancerFactory(1)
     ],
     [

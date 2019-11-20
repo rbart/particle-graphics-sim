@@ -25,7 +25,7 @@ export class BasicParticleBuilder implements ParticleBuilder {
 
   private generateParticle(bounds: Rectangle): Particle {
     let mass = Math.floor(Math.random() * (this.maxMass - this.minMass)) + this.minMass;
-    let radius = Math.max(Math.sqrt(mass), 0.5)
+    let radius = Math.max(Math.sqrt(mass), 1)
     let randomPosition = bounds.origin.add(new Vector2d(
       Math.floor(Math.random() * bounds.extents.x - radius) + radius,
       Math.floor(Math.random() * bounds.extents.y - radius) + radius,

@@ -16,7 +16,7 @@ export default class ApplyColorGravityVisitor extends ApplyGravityVisitor {
     let colorCosine = this.particle.hue.cosineSimilarity(other.hue)
     let radSum = this.particle.rad + other.rad
     let gravityStrength =
-      (colorCosine * other.mass * this.gravityCoef) / (gravityVector.lengthSquared() + radSum)
+      (colorCosine * other.mass * this.gravityCoef) / (gravityVector.lengthSquared() * this.particle.mass + radSum)
     gravityStrength = Math.min(10, gravityStrength)
     gravityVector.multiplyMutate(gravityStrength / gravityVector.length())
     this.particle.spd.subtractMutate(gravityVector)

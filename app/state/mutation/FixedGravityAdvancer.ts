@@ -5,9 +5,9 @@ import AdvancerFactory from './AdvancerFactory';
 import Rectangle from '../Rectangle';
 
 export class FixedGravityAdvancerFactory implements AdvancerFactory {
-  constructor(readonly point: Vector2d, readonly mass: number, readonly gravityCoef: number) { }
+  constructor(readonly point: Vector2d, readonly mass: number, readonly gravityCoef: number, readonly radius: number) { }
   createInstance(bounds: Rectangle): FixedGravityAdvancer {
-    return new FixedGravityAdvancer(bounds, this.point, this.mass, this.gravityCoef)
+    return new FixedGravityAdvancer(bounds, this.point, this.mass, this.gravityCoef, this.radius)
   }
 }
 
@@ -18,7 +18,8 @@ export default class FixedGravityAdvancer implements Advancer {
       bounds: Rectangle,
       point: Vector2d,
       readonly mass: number,
-      readonly gravityCoef: number) {
+      readonly gravityCoef: number,
+      readonly radius: number) {
 
     let scaledPoint = new Vector2d(
       bounds.extents.x * point.x,
@@ -31,10 +32,12 @@ export default class FixedGravityAdvancer implements Advancer {
     for (let i = 0; i < particles.length; i++) {
       let p1 = particles[i]
       let gravityVector = p1.pos.subtract(this.point)
+      let length = gravityVector.length()
+      if (length < this.radius) continue
       let gravityStrength =
         (this.mass * this.gravityCoef) / gravityVector.lengthSquared()
       gravityStrength = Math.min(20, gravityStrength)
-      gravityVector.multiplyMutate(gravityStrength / gravityVector.length())
+      gravityVector.multiplyMutate(gravityStrength / length)
       p1.spd.subtractMutate(gravityVector)
     }
   }

@@ -13,6 +13,8 @@ export class RadialParticleBuilder implements ParticleBuilder {
     private readonly mass: number,
     private readonly particleMass: number = 0,
     private readonly particleRadius: number = 1,
+    private readonly startRad: number = 0,
+    private readonly endRad: number = Math.PI * 2
   ) { }
 
   generateParticles(bounds: Rectangle): Particle[] {
@@ -26,7 +28,7 @@ export class RadialParticleBuilder implements ParticleBuilder {
   private generateParticle(bounds: Rectangle): Particle {
     let mass = this.particleMass
     let radius = this.particleRadius
-    let randomAngle = Math.random() * 2 * Math.PI
+    let randomAngle = this.startRad + (Math.random() * (this.endRad - this.startRad))
     let randomVector = new Vector2d(Math.cos(randomAngle), Math.sin(randomAngle))
     let randomRadius = (Math.random() * (this.maxRadius - this.minRadius)) + this.minRadius
     let boundsCenter = bounds.origin.add(bounds.extents.multiply(0.5))
