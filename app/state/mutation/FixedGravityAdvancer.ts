@@ -33,7 +33,11 @@ export default class FixedGravityAdvancer implements Advancer {
       let p1 = particles[i]
       let gravityVector = p1.pos.subtract(this.point)
       let length = gravityVector.length()
-      if (length < this.radius) continue
+      if (length < this.radius) {
+        particles.splice(i,1)
+        i--
+        continue
+      }
       let gravityStrength =
         (this.mass * this.gravityCoef) / gravityVector.lengthSquared()
       gravityStrength = Math.min(20, gravityStrength)

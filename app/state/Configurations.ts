@@ -21,6 +21,7 @@ import { GravityAdvancerFactory } from "./mutation/GravityAdvancer";
 import { CyclingAdvancerCollectionFactory } from "./mutation/CyclingAdvancerCollection";
 import { CombinedParticuleBuilder, LiteralParticleBuilder } from "./LiteralParticleBuilder";
 import Particle from "./Particle";
+import { FixedCircleRendererFactory } from "../visualization/FixedCircleRenderer";
 
 let GRAVITY_COEF = 2.0
 
@@ -62,25 +63,76 @@ let stdRepel = [
 
 export default class Configurations {
 
+  // Good config
   public static OrbitalSim = new Configuration(
     new CombinedParticuleBuilder([
-      new RadialParticleBuilder(1000, 100, 200, GRAVITY_COEF, 900, 0.1, 1.2),
-      new RadialParticleBuilder(2000, 200, 400, GRAVITY_COEF, 1200, 0.1, 1.2)
+      new RadialParticleBuilder(3000, 100, 400, GRAVITY_COEF, 500, 0.5, 1.2),
     ]),
     [
-      new CyclingAdvancerCollectionFactory(25,
-        [
-          [
-            new BasicAdvancerFactory(0.9975),
-            new FixedGravityAdvancerFactory(new Vector2d(0.5, 0.5), 500, GRAVITY_COEF, 20),
-            new QuadTreeGravityAdvancerFactory(new ApplyColorGravityVisitorFactory(GRAVITY_COEF)),
-            new WallBounceAdvancerFactory(.3)
-          ]
-        ])
+      new BasicAdvancerFactory(1),
+      new FixedGravityAdvancerFactory(new Vector2d(0.5, 0.5), 500, GRAVITY_COEF, 20),
+      new QuadTreeGravityAdvancerFactory(new ApplyGravityVisitorFactory(GRAVITY_COEF)),
+      new WallBounceAdvancerFactory(.7)
     ],
     [
       new FadeRendererFactory(1),
-      new ParticleRendererFactory()
+      new ParticleRendererFactory(),
+      new FixedCircleRendererFactory(new Vector2d(0.5, 0.5), 20)
+    ]
+  )
+
+  // fast, exhibits early standing wave effect
+  public static OrbitalSim3 = new Configuration(
+    new CombinedParticuleBuilder([
+      new RadialParticleBuilder(3000, 350, 350, GRAVITY_COEF, 500, 0.05, 1.2),
+    ]),
+    [
+      new BasicAdvancerFactory(1),
+      new FixedGravityAdvancerFactory(new Vector2d(0.5, 0.5), 500, GRAVITY_COEF, 20),
+      new QuadTreeGravityAdvancerFactory(new ApplyColorGravityVisitorFactory(GRAVITY_COEF)),
+      new WallBounceAdvancerFactory(.7)
+    ],
+    [
+      new FadeRendererFactory(1),
+      new ParticleRendererFactory(),
+      new FixedCircleRendererFactory(new Vector2d(0.5, 0.5), 20)
+    ]
+  )
+
+  // Slow - takes about 30 seconds to swap.
+  public static SwappingMoons = new Configuration(
+    new CombinedParticuleBuilder([
+      new RadialParticleBuilder(1, 200, 200, GRAVITY_COEF, 1000, 1, 3, 3.14, 3.14),
+      new RadialParticleBuilder(1, 210, 210, GRAVITY_COEF, 1000, 1, 3, 0, 0),
+    ]),
+    [
+      new BasicAdvancerFactory(1),
+      new FixedGravityAdvancerFactory(new Vector2d(0.5, 0.5), 1000, GRAVITY_COEF, 20),
+      new QuadTreeGravityAdvancerFactory(new ApplyGravityVisitorFactory(GRAVITY_COEF)),
+      new WallBounceAdvancerFactory(.7)
+    ],
+    [
+      new FadeRendererFactory(0.03),
+      new ParticleRendererFactory(),
+      new FixedCircleRendererFactory(new Vector2d(0.5, 0.5), 20)
+    ]
+  )
+
+  public static OrbitalSim5 = new Configuration(
+    new CombinedParticuleBuilder([
+      new RadialParticleBuilder(1, 300, 300, GRAVITY_COEF, 1000, 4, 10, 0, 0),
+      new RadialParticleBuilder(4000, 350, 350, GRAVITY_COEF, 1000, 0, 1)//, Math.PI*0.7, Math.PI*1.4),
+    ]),
+    [
+      new BasicAdvancerFactory(1),
+      new FixedGravityAdvancerFactory(new Vector2d(0.5, 0.5), 1000, GRAVITY_COEF, 20),
+      new QuadTreeGravityAdvancerFactory(new ApplyGravityVisitorFactory(GRAVITY_COEF)),
+      //new WallBounceAdvancerFactory(.7)
+    ],
+    [
+      new FadeRendererFactory(0.3),
+      new ParticleRendererFactory(),
+      new FixedCircleRendererFactory(new Vector2d(0.5, 0.5), 20)
     ]
   )
 

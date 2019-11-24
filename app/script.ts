@@ -24,7 +24,7 @@ let ctx: CanvasRenderingContext2D = <CanvasRenderingContext2D>c.getContext("2d")
 
 let bounds: Rectangle = new Rectangle(new Vector2d(0,0), new Vector2d(c.width, c.height))
 
-let configuration = Configurations.OrbitalSim
+let configuration = Configurations.SwappingMoons
 
 let particles: Particle[] = configuration.particleBuilder.generateParticles(bounds)
 let renderer: Renderer = configuration.getRenderer(bounds, ctx);
@@ -44,6 +44,8 @@ function framesPerSecondLogger() {
 }
 
 setInterval(framesPerSecondLogger(), 2000)
+
+renderer.initialize()
 
 function drawFrame() {
   frameNumber++
