@@ -1,6 +1,0 @@
-app/**/*.js
-app/**/*.js.map
-.cache
-dist
-package-lock.json
-node_modules

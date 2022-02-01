@@ -1,5 +1,16 @@
 import Advancer from './Advancer'
 import Particle from '../Particle'
+import AdvancerFactory from './AdvancerFactory'
+import Rectangle from '../Rectangle'
+
+export class GravityAdvancerFactory implements AdvancerFactory {
+
+  constructor(private gravityCoef: number) { }
+
+  createInstance(_: Rectangle): GravityAdvancer {
+    return new GravityAdvancer(this.gravityCoef)
+  }
+}
 
 export default class GravityAdvancer implements Advancer {
 
@@ -13,10 +24,13 @@ export default class GravityAdvancer implements Advancer {
         let p2 = particles[j];
         if (!isFinite(p2.pos.length())) continue
         let diff = p1.pos.subtract(p2.pos);
-        let gravityStrength = 1.0/(diff.lengthSquared()) * this.gravityCoef;
-        let gravityVector = diff.multiply(gravityStrength);
-        p1.spd.subtractMutate(gravityVector)
-        p2.spd.addMutate(gravityVector)
+        let diffUnit = diff.multiply(1.0 / diff.length())
+        let radSum = p1.rad + p2.rad
+        let gravityStrength = (this.gravityCoef)/(diff.lengthSquared() + radSum);
+        gravityStrength = Math.min(10, gravityStrength)
+        let gravityVector = diffUnit.multiply(gravityStrength);
+        p1.spd.subtractMutate(gravityVector.multiply(p2.mass))
+        p2.spd.addMutate(gravityVector.multiply(p1.mass))
       }
     }
   }

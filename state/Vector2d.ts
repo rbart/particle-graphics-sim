@@ -44,6 +44,10 @@ export default class Vector2d implements HasPosition2d {
       return new Vector2d(this.x * scalar, this.y * scalar);
     }
 
+    multiplyVector(other: Vector2d): Vector2d {
+      return new Vector2d(this.x * other.x, this.y * other.y);
+    }
+
     multiplyMutate(scalar: number) {
       this.x *= scalar
       this.y *= scalar

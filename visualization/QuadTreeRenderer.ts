@@ -1,18 +1,26 @@
 import Particle from '../state/Particle'
-import Renderer from './Renderer'
+import Renderer, { RendererFactory } from './Renderer'
 import QuadTreeBuilder  from '../datastructure/QuadTreeBuilder'
 import { QuadTreeNode, QuadTreeInnerNode, QuadTreeLeafNode } from '../datastructure/QuadTreeNode'
 import QuadTreeVisitor from '../datastructure/QuadTreeVisitor'
 import ParticleCollection, { ParticleCollectionFactory } from '../state/ParticleCollection'
 import Rectangle from '../state/Rectangle'
 
+export class QuadTreeRendererFactory implements RendererFactory {
+  constructor(private readonly opacity: number) { }
+  createInstance(bounds: Rectangle, ctx: CanvasRenderingContext2D): Renderer {
+    return new QuadTreeRenderer(bounds, ctx, this.opacity)
+  }
+}
+
 export default class QuadTreeRenderer implements Renderer {
 
   private quadTree: QuadTreeNode<Particle, ParticleCollection>
 
   constructor(
+    readonly bounds: Rectangle,
     readonly ctx: CanvasRenderingContext2D,
-    readonly bounds: Rectangle)  {
+    readonly opacity: number)  {
     // TODO: don't create the quadtree at all here. We should reuse a single quadTree
     // throughout
     let minNodeSize = bounds.extents.length() / 80
@@ -33,7 +41,7 @@ export default class QuadTreeRenderer implements Renderer {
 
     let initialAlpha = this.ctx.globalAlpha;
     this.ctx.lineWidth = 0.5
-    this.ctx.globalAlpha = 0.2
+    this.ctx.globalAlpha = this.opacity
     this.ctx.strokeStyle = "rgb(100,100,100)";
     this.ctx.beginPath();
 
